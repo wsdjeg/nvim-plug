@@ -23,10 +23,13 @@ M.install = function(plugSpec)
 
 	table.insert(cmd, plugSpec.url)
 	table.insert(cmd, plugSpec.path)
+  vim.print(cmd)
 	jobs[job.start(cmd, {
 		on_exit = function(id, data, single)
 			if data == 0 and single == 0 then
         notify.notify('Successfully installed ' .. jobs[id])
+      else
+        notify.notify('failed to install ' .. jobs[id])
 			end
 		end,
 	})] =
