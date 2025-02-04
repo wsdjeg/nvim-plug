@@ -8,6 +8,13 @@
 
 local M = {}
 
+
+--- @class PluginSpec
+--- @field rtp string
+--- @field events table<string>
+--- @field cmds table<string>
+--- @field config function
+
 -- {'loadconf': 1,
 -- 'type': 'none',
 -- 'overwrite': 1,
