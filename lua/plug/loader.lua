@@ -36,7 +36,7 @@ local M = {}
 -- 'merged': 0,
 -- 'path': 'C:/Users/wsdjeg/.SpaceVim/bundle/defx-git'}
 function M.load(plugSpec)
-  if plugSpec.rtp then
+  if vim.fn.isdirectory(plugSpec.rtp) == 1 then
     vim.opt.runtimepath:append(plugSpec.rtp)
     if vim.fn.has('vim_starting') ~= 1 then
       local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}')
