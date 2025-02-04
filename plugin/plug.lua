@@ -5,18 +5,8 @@
 -- License: GPLv3
 --=============================================================================
 
-
-local M = {}
-
-local all_plugins = {}
-
-function M.add(plugins)
-  
-end
-
-function M.get()
-  return all_plugins
-end
-
-
-return M
+vim.api.nvim_create_user_command("PlugInstall", function(opt)
+	require("plug.installer").install(opt.fargs)
+end, { nargs = "*", complete = function(...)
+  local plugins = require('plug').get()
+end })
