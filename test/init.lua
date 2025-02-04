@@ -10,7 +10,7 @@ vim.opt.runtimepath:append('~/.SpaceVim')
 
 require('plug').setup({
 
-  bundle_dir = 'D:\\bundle_dir\\',
+  bundle_dir = 'D:/bundle_dir',
 
 })
 

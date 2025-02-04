@@ -11,7 +11,7 @@ local job = require("spacevim.api.job")
 local notify = require("spacevim.api.notify")
 local jobs = {}
 
-M.install = function(plugSpec)
+local function install_plugin(plugSpec)
 	local cmd = { "git", "clone", "--depth", "1" }
 	if plugSpec.branch then
 		table.insert(cmd, "--branch")
@@ -23,17 +23,23 @@ M.install = function(plugSpec)
 
 	table.insert(cmd, plugSpec.url)
 	table.insert(cmd, plugSpec.path)
-  vim.print(cmd)
-	jobs[job.start(cmd, {
+  vim.print(plugSpec)
+	local jobid = job.start(cmd, {
 		on_exit = function(id, data, single)
 			if data == 0 and single == 0 then
-        notify.notify('Successfully installed ' .. jobs[id])
+        notify.notify('Successfully installed ' .. jobs['jobid_' .. id])
       else
-        notify.notify('failed to install ' .. jobs[id])
+        notify.notify('failed to install ' .. jobs['jobid_' .. id])
 			end
 		end,
-	})] =
-		plugSpec.name
+	})
+  jobs['jobid_' .. jobid] = plugSpec.name
+end
+
+M.install = function(plugSpecs)
+  for _, v in ipairs(plugSpecs) do
+    install_plugin(v)
+  end
 end
 
 return M
