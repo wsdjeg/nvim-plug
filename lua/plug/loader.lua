@@ -15,12 +15,19 @@ local config = require("plug.config")
 --- @field cmds table<string>
 --- @field config function
 
-
 function M.parser(plugSpec)
-	plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1]
-
-	if plugSpec.type == "color" then
-		plugSpec.rtp = config.bundle_dir .. "/"
+	if not plugSpec.type or plugSpec.type == "none" then
+    plugSpec.rtp = config.bundle_dir .. "/" .. plugSpec[1]
+		plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1]
+		plugSpec.repo = "https://github.com/" .. plugSpec[1]
+	elseif plugSpec.type == "color" then
+    plugSpec.rtp = config.bundle_dir .. "/" .. plugSpec[1]
+		plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1] .. '/color'
+		plugSpec.repo = "https://github.com/" .. plugSpec[1]
+	elseif plugSpec.type == "plugin" then
+    plugSpec.rtp = config.bundle_dir .. "/" .. plugSpec[1]
+		plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1] .. '/plugin'
+		plugSpec.repo = "https://github.com/" .. plugSpec[1]
 	end
 
 	return plugSpec
