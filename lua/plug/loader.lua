@@ -5,19 +5,26 @@
 -- License: GPLv3
 --=============================================================================
 
-
 local M = {}
 
-function M.parser(plugSpec)
-  
-end
-
+local config = require("plug.config")
 
 --- @class PluginSpec
 --- @field rtp string
 --- @field events table<string>
 --- @field cmds table<string>
 --- @field config function
+
+
+function M.parser(plugSpec)
+	plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1]
+
+	if plugSpec.type == "color" then
+		plugSpec.rtp = config.bundle_dir .. "/"
+	end
+
+	return plugSpec
+end
 
 -- {'loadconf': 1,
 -- 'type': 'none',
@@ -40,16 +47,15 @@ end
 -- 'merged': 0,
 -- 'path': 'C:/Users/wsdjeg/.SpaceVim/bundle/defx-git'}
 function M.load(plugSpec)
-  if vim.fn.isdirectory(plugSpec.rtp) == 1 then
-    vim.opt.runtimepath:append(plugSpec.rtp)
-    if vim.fn.has('vim_starting') ~= 1 then
-      local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}')
-      for _, f in ipairs(plugin_directory_files) do
-        vim.cmd.source(f)
-      end
-    end
-  end
+	if vim.fn.isdirectory(plugSpec.rtp) == 1 then
+		vim.opt.runtimepath:append(plugSpec.rtp)
+		if vim.fn.has("vim_starting") ~= 1 then
+			local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, "plugin/*.{lua,vim}")
+			for _, f in ipairs(plugin_directory_files) do
+				vim.cmd.source(f)
+			end
+		end
+	end
 end
-
 
 return M
