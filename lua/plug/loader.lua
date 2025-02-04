@@ -8,6 +8,10 @@
 
 local M = {}
 
+function M.parser(plugSpec)
+  
+end
+
 
 --- @class PluginSpec
 --- @field rtp string

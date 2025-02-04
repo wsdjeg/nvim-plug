@@ -17,6 +17,8 @@ function M.setup(opt) end
 --- @param plugins table<PluginSpec>
 function M.add(plugins)
 	for _, plug in ipairs(plugins) do
+    loader.parser(plug)
+    all_plugins[plug.name] = plug
 		if plug.cmds then
 			hooks.on_cmds(plug.cmds, plug)
 		end
