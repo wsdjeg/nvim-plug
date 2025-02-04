@@ -25,6 +25,16 @@ local function install_plugin(plugSpec)
 	table.insert(cmd, plugSpec.path)
   vim.print(plugSpec)
 	local jobid = job.start(cmd, {
+    on_stdout = function(id, data)
+      for _, v in ipairs(data) do
+        notify.notify(jobs['jobid_' .. id .. ':' .. v])
+      end
+    end,
+    on_stderr = function(id, data)
+      for _, v in ipairs(data) do
+        notify.notify(jobs['jobid_' .. id .. ':' .. v])
+      end
+    end,
 		on_exit = function(id, data, single)
 			if data == 0 and single == 0 then
         notify.notify('Successfully installed ' .. jobs['jobid_' .. id])
