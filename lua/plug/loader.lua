@@ -38,6 +38,12 @@ local M = {}
 function M.load(plugSpec)
   if plugSpec.rtp then
     vim.opt.runtimepath:append(plugSpec.rtp)
+    if vim.fn.has('vim_starting') ~= 1 then
+      local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}')
+      for _, f in ipairs(plugin_directory_files) do
+        vim.cmd.source(f)
+      end
+    end
   end
 end
 
