@@ -7,6 +7,9 @@
 
 local M = {}
 
+local job = require('spacevim.api.job')
+local notify = require('spacevim.api.notify')
+
 
 M.install = function(plugSpec)
 end
