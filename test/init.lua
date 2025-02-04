@@ -14,10 +14,6 @@ require('plug').setup({
 
 })
 
-require('autocmds')
-require('options')
-require('keymaps')
-
 require("plug").add({
 	{
 		"wsdjeg/scrollbar.vim",
