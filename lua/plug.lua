@@ -10,6 +10,10 @@ local M = {}
 
 local all_plugins = {}
 
+function M.setup(opt)
+  
+end
+
 function M.add(plugins)
   
 end

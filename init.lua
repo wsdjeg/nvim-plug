@@ -5,6 +5,8 @@
 -- License: GPLv3
 --=============================================================================
 
+vim.opt.runtimepath:append('.')
+
 require('plug').setup({
 
   bundle_dir = 'D:\\bundle_dir\\',
