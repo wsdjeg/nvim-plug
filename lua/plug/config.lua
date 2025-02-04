@@ -8,10 +8,10 @@
 
 local M = {}
 
-M.budnle_dir = vim.fn.stdpath('data') .. '/bundle_dir' 
+M.bundle_dir = vim.fn.stdpath('data') .. '/bundle_dir' 
 
 function M.setup(opt)
-  M.budnle_dir = opt.budnle_dir or M.budnle_dir
+  M.bundle_dir = opt.bundle_dir or M.bundle_dir
 end
 
 return M

@@ -16,6 +16,7 @@ local config = require("plug.config")
 --- @field config function
 
 function M.parser(plugSpec)
+  plugSpec.name = vim.split(plugSpec[1], '/')[2]
 	if not plugSpec.type or plugSpec.type == "none" then
     plugSpec.rtp = config.bundle_dir .. "/" .. plugSpec[1]
 		plugSpec.path = config.bundle_dir .. "/" .. plugSpec[1]

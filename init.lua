@@ -6,6 +6,7 @@
 --=============================================================================
 
 vim.opt.runtimepath:append('.')
+vim.opt.runtimepath:append('~/.SpaceVim')
 
 require('plug').setup({
 
