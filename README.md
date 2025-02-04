@@ -32,3 +32,7 @@ require("plug").add({
 | ------ | ------------------------------------------------------- |
 | `[1]`  | `string`, plugin repo short name, `wsdjeg/flygrep.nvim` |
 | `cmds` | `table<string>`, commands lazy loading                  |
+
+## Commands
+
+- `:PlugInstall`: install specific plugin
