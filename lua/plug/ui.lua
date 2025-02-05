@@ -58,7 +58,7 @@ end
 
 
 --- @class PlugUiData
---- @filed clone_process number
+--- @filed clone_process string
 --- @filed clone_done boolean
 
 
