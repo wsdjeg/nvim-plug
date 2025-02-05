@@ -60,6 +60,17 @@ require('plug').add({
 
 - `:PlugInstall`: install specific plugin
 
+## Custom Plugin UI
+
+The default is ui is inspired by [vundle](https://github.com/VundleVim/Vundle.vim), to setup cutom ui, you need to creat a on_update function, this function is called with two arges:
+
+- name: `string`
+- date: `PlugUiData`
+
+| key          | description                              |
+| ------------ | ---------------------------------------- |
+| `clone_done` | boolead, is true when clone successfully |
+
 ## Feedback
 
 The development of this plugin is in [`SpaceVim/bundle/nvim-plug`](https://github.com/SpaceVim/SpaceVim/tree/master/bundle/nvim-plug) directory.
