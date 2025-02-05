@@ -15,6 +15,7 @@ function M.setup(opt)
   M.bundle_dir = opt.bundle_dir or M.bundle_dir
   M.max_processes = opt.max_processes or M.max_processes
   M.base_url = opt.base_url or M.base_url
+  M.ui = opt.ui or M.ui
 end
 
 return M
