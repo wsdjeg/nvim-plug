@@ -49,10 +49,13 @@ M.open = function()
   if not vim.api.nvim_buf_is_valid(bufnr) then
     bufnr = vim.api.nvim_create_buf(false, true)
   end
-  if vim.api.nvim_win_is_valid(winid) then
+  if not vim.api.nvim_win_is_valid(winid) then
     winid = vim.api.nvim_open_win(bufnr, false, {
       split = 'left',
     })
+  end
+  if vim.api.nvim_buf_is_valid(bufnr) then
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_context())
   end
 end
 
