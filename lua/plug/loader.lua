@@ -79,7 +79,8 @@ function M.parser(plugSpec)
     else
       plugSpec.path = config.raw_plugin_dir .. '/' .. plugSpec.script_type .. '/' .. plugSpec.name
       if not add_raw_rtp then
-        vim.opt.runtimepath:append(config.raw_plugin_dir)
+        vim.opt.runtimepath:prepend(config.raw_plugin_dir)
+        vim.opt.runtimepath:append(config.raw_plugin_dir .. '/after')
         add_raw_rtp = true
       end
     end
@@ -114,7 +115,10 @@ function M.load(plugSpec)
     and not loaded_plugins[plugSpec.name]
     and not plugSpec.fetch
   then
-    vim.opt.runtimepath:append(plugSpec.rtp)
+    vim.opt.runtimepath:prepend(plugSpec.rtp)
+    if vim.fn.isdirectory(plugSpec.rtp .. '/after') == 1 then
+      vim.opt.runtimepath:append(plugSpec.rtp .. '/after')
+    end
     loaded_plugins[plugSpec.name] = true
     if type(plugSpec.config) == 'function' then
       plugSpec.config()
