@@ -80,7 +80,7 @@ require('plug').setup({
   -- max number of processes used for nvim-plug job
   max_processes = 5,
   base_url = 'https://github.com',
-  -- default ui is `notify`, use `default` for split window UI
+  -- default ui is `default`, use `notify` for floating window notify
   ui = 'default',
   -- default is nil
   http_proxy = 'http://127.0.0.1:7890',

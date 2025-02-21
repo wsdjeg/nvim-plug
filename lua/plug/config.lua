@@ -11,7 +11,7 @@ M.bundle_dir = vim.fn.stdpath('data') .. '/bundle_dir'
 M.raw_plugin_dir = vim.fn.stdpath('data') .. '/bundle_dir/raw_plugin'
 M.max_processes = 5
 M.base_url = 'https://github.com/'
-M.ui = 'notify'
+M.ui = 'default'
 M.clone_depth = '1'
 M.enable_priority = false
 function M.setup(opt)
