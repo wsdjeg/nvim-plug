@@ -5,6 +5,16 @@
 -- License: GPLv3
 --=============================================================================
 
+local function complete(a)
+  local plug_name = {}
+  for k, _ in pairs(require('plug').get()) do
+    if a and vim.startswith(k, a) then
+      table.insert(plug_name, k)
+    end
+  end
+  return plug_name
+end
+
 vim.api.nvim_create_user_command('PlugInstall', function(opt)
   local plugs = {}
   local all_plugins = require('plug').get()
@@ -28,13 +38,7 @@ vim.api.nvim_create_user_command('PlugInstall', function(opt)
   end
 end, {
   nargs = '*',
-  complete = function()
-    local plug_name = {}
-    for k, _ in pairs(require('plug').get()) do
-      table.insert(plug_name, k)
-    end
-    return plug_name
-  end,
+  complete = complete,
 })
 
 vim.api.nvim_create_user_command('PlugUpdate', function(opt)
@@ -60,12 +64,5 @@ vim.api.nvim_create_user_command('PlugUpdate', function(opt)
   end
 end, {
   nargs = '*',
-  complete = function()
-    local plug_name = {}
-    for k, _ in pairs(require('plug').get()) do
-      table.insert(plug_name, k)
-    end
-    return plug_name
-  end,
+  complete = complete,
 })
-
