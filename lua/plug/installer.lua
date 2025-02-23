@@ -188,6 +188,10 @@ function H.update_plugin(plugSpec, force)
     -- if the directory does not exist, return failed
     on_uidate(plugSpec.name, { command = 'pull', pull_done = false })
     return
+  elseif vim.fn.isdirectory(plugSpec.path .. '/.git') ~= 1 then
+    -- if the directory is not git repo
+    on_uidate(plugSpec.name, { command = 'pull', pull_done = false })
+    return
   elseif plugSpec.frozen and not force then
     on_uidate(plugSpec.name, { command = 'pull', pull_done = true })
     return
