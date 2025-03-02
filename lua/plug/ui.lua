@@ -129,7 +129,7 @@ end
 --- @param data PlugUiData
 M.on_update = function(name, data)
   plugin_status[name] = vim.tbl_deep_extend('force', plugin_status[name] or {}, data)
-  if vim.api.nvim_buf_is_valid(bufnr) then
+  if vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_win_is_valid(winid) then
     vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr})
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_context())
     vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr})
