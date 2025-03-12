@@ -42,6 +42,9 @@ function M.on_cmds(cmds, plugSpec)
       if opt.bang then
           excmd = excmd .. '!'
       end
+      if opt.line1 < opt.line2 then
+          excmd = opt.line1 .. ',' .. opt.line2 .. excmd
+      end
       vim.cmd(excmd .. ' ' .. opt.args)
     end, {
       nargs = '*',
