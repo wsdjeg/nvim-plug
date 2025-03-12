@@ -38,12 +38,18 @@ function M.on_cmds(cmds, plugSpec)
     cmd_plugins[cmd] = plugSpec
     vim.api.nvim_create_user_command(cmd, function(opt)
       plugin_loader.load(cmd_plugins[opt.name])
-      vim.cmd(opt.name .. ' ' .. opt.args)
+      local excmd = opt.name
+      if opt.bang then
+          excmd = excmd .. '!'
+      end
+      vim.cmd(excmd .. ' ' .. opt.args)
     end, {
       nargs = '*',
       complete = function(_)
         return {}
       end,
+      bang = true,
+      range = true,
     })
   end
 end
