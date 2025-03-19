@@ -10,8 +10,6 @@ local M = {}
 local H = {}
 
 local job = require('spacevim.api.job')
-local notify = require('spacevim.api.notify')
-local jobs = {}
 local config = require('plug.config')
 local loader = require('plug.loader')
 
@@ -30,7 +28,7 @@ local on_uidate
 if config.ui == 'default' then
   on_uidate = require('plug.ui').on_update
 elseif config.ui == 'notify' then
-  on_uidate = function(name, date) end
+  on_uidate = require('plug.ui.nitify').on_uidate
 end
 
 local processes = 0
@@ -48,16 +46,6 @@ function H.build(plugSpec)
   end
   on_uidate(plugSpec.name, { command = 'build' })
   local jobid = job.start(plugSpec.build, {
-    on_stdout = function(id, data)
-      for _, v in ipairs(data) do
-        notify.notify(jobs['jobid_' .. id .. ':' .. v])
-      end
-    end,
-    on_stderr = function(id, data)
-      for _, v in ipairs(data) do
-        notify.notify(jobs['jobid_' .. id .. ':' .. v])
-      end
-    end,
     on_exit = function(id, data, single)
       if data == 0 and single == 0 then
         on_uidate(plugSpec.name, { build_done = true })
@@ -76,7 +64,6 @@ function H.build(plugSpec)
   })
   if jobid > 0 then
     processes = processes + 1
-    jobs['jobid_' .. jobid] = plugSpec.name
   else
     on_uidate(plugSpec.name, { build_done = false })
   end
@@ -114,7 +101,6 @@ function H.download_raw(plugSpec, force)
     },
   })
   processes = processes + 1
-  jobs['jobid_' .. jobid] = plugSpec.name
 end
 
 --- @param plugSpec PluginSpec
@@ -176,7 +162,6 @@ function H.install_plugin(plugSpec)
     },
   })
   processes = processes + 1
-  jobs['jobid_' .. jobid] = plugSpec.name
 end
 
 --- @param plugSpec PluginSpec
@@ -231,7 +216,6 @@ function H.update_plugin(plugSpec, force)
   })
   if jobid > 0 then
     processes = processes + 1
-    jobs['jobid_' .. jobid] = plugSpec.name
   else
     on_uidate(plugSpec.name, { pull_done = false })
   end

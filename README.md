@@ -7,19 +7,19 @@
 
 <!-- vim-markdown-toc GFM -->
 
-- [Intro](#intro)
-- [Features](#features)
-- [Usage](#usage)
-  - [Installation](#installation)
-  - [Setup nvim-plug](#setup-nvim-plug)
-  - [Add plugins](#add-plugins)
-  - [Self upgrade](#self-upgrade)
-- [Plugin Spec](#plugin-spec)
-- [Commands](#commands)
-- [Default UI](#default-ui)
-- [Custom Plugin UI](#custom-plugin-ui)
-- [Plugin priority](#plugin-priority)
-- [Feedback](#feedback)
+* [Intro](#intro)
+* [Features](#features)
+* [Usage](#usage)
+    * [Installation](#installation)
+    * [Setup nvim-plug](#setup-nvim-plug)
+    * [Add plugins](#add-plugins)
+    * [Self upgrade](#self-upgrade)
+* [Plugin Spec](#plugin-spec)
+* [Commands](#commands)
+* [Default UI](#default-ui)
+* [Custom Plugin UI](#custom-plugin-ui)
+* [Plugin priority](#plugin-priority)
+* [Feedback](#feedback)
 
 <!-- vim-markdown-toc -->
 
@@ -80,7 +80,9 @@ require('plug').setup({
   -- max number of processes used for nvim-plug job
   max_processes = 5,
   base_url = 'https://github.com',
-  -- default ui is `default`, use `notify` for floating window notify
+  -- default ui is `default`,
+  -- to use `notify` for floating window notify
+  -- you need to install wsdjeg/notify.nvim
   ui = 'default',
   -- default is nil
   http_proxy = 'http://127.0.0.1:7890',
