@@ -17,6 +17,7 @@
 * [Plugin Spec](#plugin-spec)
 * [Commands](#commands)
 * [Default UI](#default-ui)
+* [Notify UI](#notify-ui)
 * [Custom Plugin UI](#custom-plugin-ui)
 * [Plugin priority](#plugin-priority)
 * [Feedback](#feedback)
@@ -217,6 +218,73 @@ vim.cmd('hi def link PlugProcess Repeat')
 vim.cmd('hi def link PlugDone Type')
 vim.cmd('hi def link PlugFailed WarningMsg')
 vim.cmd('hi def link PlugDoing Number')
+```
+
+## Notify UI
+
+You can also change the ui to `notify`:
+
+![plug-notify](https://github.com/user-attachments/assets/74c16409-02e9-4042-9874-17e656e4295a)
+
+This UI is based on [notify.nvim](https://github.com/wsdjeg/notify.nvim). So you need to install it before using nvim-plug:
+
+```lua
+if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/nvim-plug') == 0 then
+  vim.fn.system({
+    'git',
+    'clone',
+    '--depth',
+    '1',
+    'https://github.com/wsdjeg/nvim-plug.git',
+    'D:/bundle_dir/wsdjeg/nvim-plug',
+  })
+end
+vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/nvim-plug')
+if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/notify.nvim') == 0 then
+  vim.fn.system({
+    'git',
+    'clone',
+    '--depth',
+    '1',
+    'https://github.com/wsdjeg/notify.nvim.git',
+    'D:/bundle_dir/wsdjeg/notify.nvim',
+  })
+end
+vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/notify.nvim')
+
+require('plug').setup({
+
+  bundle_dir = 'D:/bundle_dir',
+  raw_plugin_dir = 'D:/bundle_dir/raw_plugin',
+  ui = 'notify',
+  http_proxy = 'http://127.0.0.1:7890',
+  https_proxy = 'http://127.0.0.1:7890',
+  enable_priority = true,
+  max_processes = 16,
+})
+
+require('plug').add({
+  {
+    'wsdjeg/logger.nvim',
+    config = function()
+      require('logger').setup({ level = 0 })
+      vim.keymap.set(
+        'n',
+        '<leader>hL',
+        '<cmd>lua require("logger").viewRuntimeLog()<cr>',
+        { silent = true }
+      )
+    end,
+  },
+  {
+    'wsdjeg/notify.nvim',
+    fetch = true,
+  },
+  {
+    'wsdjeg/nvim-plug',
+    fetch = true,
+  },
+})
 ```
 
 ## Custom Plugin UI
