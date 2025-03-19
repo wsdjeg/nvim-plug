@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/wsdjeg/nvim-plug/compare/v0.2.0...v0.3.0) (2025-03-19)
+
+
+### Features
+
+* **ui:** support notify.nvim ([69b7886](https://github.com/wsdjeg/nvim-plug/commit/69b7886942923901499544ccced15602305a936a))
+
 ## [0.2.0](https://github.com/wsdjeg/nvim-plug/compare/v0.1.1...v0.2.0) (2025-03-13)
 
 
