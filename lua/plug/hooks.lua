@@ -37,13 +37,24 @@ function M.on_cmds(cmds, plugSpec)
   for _, cmd in ipairs(cmds) do
     cmd_plugins[cmd] = plugSpec
     vim.api.nvim_create_user_command(cmd, function(opt)
+      for _, demmy_command in ipairs(plugSpec.cmds) do
+        vim.api.nvim_del_user_command(demmy_command)
+      end
       plugin_loader.load(cmd_plugins[opt.name])
+      if vim.fn.exists(':' .. opt.name) ~= 2 then
+        vim.api.nvim_echo(
+          { { string.format('command %s is not found.', opt.name), 'WarningMsg' } },
+          false,
+          {}
+        )
+        return
+      end
       local excmd = opt.name
       if opt.bang then
-          excmd = excmd .. '!'
+        excmd = excmd .. '!'
       end
       if opt.line1 < opt.line2 then
-          excmd = opt.line1 .. ',' .. opt.line2 .. excmd
+        excmd = opt.line1 .. ',' .. opt.line2 .. excmd
       end
       vim.cmd(excmd .. ' ' .. opt.args)
     end, {
