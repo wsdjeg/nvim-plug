@@ -20,6 +20,7 @@
 * [Notify UI](#notify-ui)
 * [Custom Plugin UI](#custom-plugin-ui)
 * [Plugin priority](#plugin-priority)
+* [Self-Promotion](#self-promotion)
 * [Feedback](#feedback)
 
 <!-- vim-markdown-toc -->
@@ -362,6 +363,16 @@ require('plug').add({
 })
 require('plug').load()
 ```
+
+## Self-Promotion
+
+Like this plugin? Star the repository on
+GitHub.
+
+Love this plugin? Follow [me](https://wsdjeg.net/) on
+[GitHub](https://github.com/wsdjeg) and
+[Twitter](http://twitter.com/wsdtty).
+
 
 ## Feedback
 
