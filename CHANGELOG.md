@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/wsdjeg/nvim-plug/compare/v0.3.0...v0.3.1) (2025-04-13)
+
+
+### Bug Fixes
+
+* fix default base_url ([0541528](https://github.com/wsdjeg/nvim-plug/commit/05415284ff2258bb356fdddfdf337b60ff1ac252))
+* **on_cmd:** clear lazy cmd when load plugin ([19b043e](https://github.com/wsdjeg/nvim-plug/commit/19b043e967c11e886f73d8edf661d5dfd4468533))
+
 ## [0.3.0](https://github.com/wsdjeg/nvim-plug/compare/v0.2.0...v0.3.0) (2025-03-19)
 
 
