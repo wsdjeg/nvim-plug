@@ -137,7 +137,7 @@ require('plug').add({
 
 ### `import` option
 
-The default `import` option is `vim.fn.stdpath('config') .. '\plugins` which means nvim-plug will load `PluginSpec` automatically from this directory.
+The default `import` option is `plugins` which means nvim-plug will load `PluginSpec` automatically from `plugins` directory im runtimepath.
 
 ### Self upgrade
 

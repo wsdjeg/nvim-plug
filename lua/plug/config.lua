@@ -13,7 +13,7 @@ M.max_processes = 5
 M.base_url = 'https://github.com'
 M.ui = 'default'
 M.clone_depth = '1'
-M.import = 'plugins/'
+M.import = 'plugins'
 M.enable_priority = false
 function M.setup(opt)
   M.bundle_dir = opt.bundle_dir or M.bundle_dir
