@@ -13,6 +13,7 @@
     * [Installation](#installation)
     * [Setup nvim-plug](#setup-nvim-plug)
     * [Add plugins](#add-plugins)
+    * [`import` option](#import-option)
     * [Self upgrade](#self-upgrade)
 * [Plugin Spec](#plugin-spec)
 * [Commands](#commands)
@@ -133,6 +134,12 @@ require('plug').add({
   },
 })
 ```
+
+### `import` option
+
+The default `import` option is `plugins` which means nvim-plug will load `PluginSpec` automatically from `plugins` directory im runtimepath.
+
+To use this option, you need to call `plug.load()` function.
 
 ### Self upgrade
 
@@ -372,7 +379,6 @@ GitHub.
 Love this plugin? Follow [me](https://wsdjeg.net/) on
 [GitHub](https://github.com/wsdjeg) and
 [Twitter](http://twitter.com/wsdtty).
-
 
 ## Feedback
 
