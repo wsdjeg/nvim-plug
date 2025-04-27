@@ -1,6 +1,5 @@
 # nvim-plug
 
-[![](https://spacevim.org/img/build-with-SpaceVim.svg)](https://spacevim.org)
 [![GPLv3 License](https://img.spacevim.org/license-GPLv3-blue.svg)](LICENSE)
 
 ![nvim-plug](https://wsdjeg.net/images/nvim-plug.gif)
