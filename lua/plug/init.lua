@@ -90,6 +90,8 @@ function M.load()
       local plug = assert(loadfile(v))() ---@type any?
       if type(plug) == 'table' and type(plug[1]) == 'string' then
         M.add({ plug })
+      elseif type(plug) == 'table' and type(plug[1]) == 'table' then
+        M.add(plug)
       end
     end
   end
