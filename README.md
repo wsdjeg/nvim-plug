@@ -139,6 +139,8 @@ require('plug').add({
 
 The default `import` option is `plugins` which means nvim-plug will load `PluginSpec` automatically from `plugins` directory im runtimepath.
 
+To use this option, you need to call `plug.load()` function.
+
 ### Self upgrade
 
 you can use nvim-plug to manager nvim-plug:
