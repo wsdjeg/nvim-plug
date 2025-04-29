@@ -86,7 +86,7 @@ function M.load()
     end
   end
   if config.import then
-    for _, v in ipairs(vim.api.nvim_get_runtime_file(config.import .. '*.lua', true)) do
+    for _, v in ipairs(vim.api.nvim_get_runtime_file(config.import .. '/*.lua', true)) do
       local plug = assert(loadfile(v))() ---@type any?
       if type(plug) == 'table' and type(plug[1]) == 'string' then
         M.add({ plug })
