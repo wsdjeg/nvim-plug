@@ -25,6 +25,7 @@ function M.setup(opt)
   M.clone_depth = opt.clone_depth or M.clone_depth
   M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
   M.enable_priority = opt.enable_priority or M.enable_priority
+  M.import = opt.import or M.import
 end
 
 return M
