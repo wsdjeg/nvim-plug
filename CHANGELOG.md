@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/wsdjeg/nvim-plug/compare/v0.3.1...v0.4.0) (2025-08-30)
+
+
+### Features
+
+* support import option ([#8](https://github.com/wsdjeg/nvim-plug/issues/8)) ([3bce0a7](https://github.com/wsdjeg/nvim-plug/commit/3bce0a7aa130e4296b6a0e7e956341e8dfa667cf))
+
+
+### Bug Fixes
+
+* **loader:** fix enabled field ([b6bb459](https://github.com/wsdjeg/nvim-plug/commit/b6bb459dfd1308103a61bb7a8dcc161206211ae8))
+
 ## [0.3.1](https://github.com/wsdjeg/nvim-plug/compare/v0.3.0...v0.3.1) (2025-04-13)
 
 
