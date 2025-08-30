@@ -32,6 +32,8 @@ local add_raw_rtp = false
 --- @field hook_install_done? function
 --- @field autoload? boolean
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
+--- @field loaded? boolean
+--- @field enabled? boolean
 
 --- @param plugSpec PluginSpec
 --- @return boolean
@@ -53,6 +55,7 @@ local function check_name(plugSpec)
   return s[#s]
 end
 
+--- @param plugSpec PluginSpec
 function M.parser(plugSpec)
   if type(plugSpec.enabled) == 'nil' then
     plugSpec.enabled = true
@@ -90,7 +93,7 @@ function M.parser(plugSpec)
   elseif plugSpec.script_type == 'color' then
     plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
     plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1] .. '/color'
-    plugSpec.repo = config.base_url .. '/' .. plugSpec[1]
+    plugSpec.url = config.base_url .. '/' .. plugSpec[1]
   elseif plugSpec.script_type == 'plugin' then
     plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
     plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1] .. '/plugin'
@@ -107,6 +110,7 @@ function M.parser(plugSpec)
   return plugSpec
 end
 
+--- @param plugSpec PluginSpec
 function M.load(plugSpec)
   if
     plugSpec.rtp
@@ -123,7 +127,7 @@ function M.load(plugSpec)
       plugSpec.config()
     end
     if vim.fn.has('vim_starting') ~= 1 then
-      local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}', 0, 1)
+      local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}', false, true)
       for _, f in ipairs(plugin_directory_files) do
         vim.cmd.source(f)
       end
