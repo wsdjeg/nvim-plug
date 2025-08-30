@@ -61,6 +61,13 @@ function M.parser(plugSpec)
     plugSpec.enabled = true
   elseif type(plugSpec.enabled) == 'function' then
     plugSpec.enabled = plugSpec.enabled()
+    -- make sure enabled() return boolean
+    if type(plugSpec.enabled) ~= 'boolean' then
+      plugSpec.enabled = false
+    end
+    if not plugSpec.enabled then
+      return plugSpec
+    end
   elseif type(plugSpec.enabled) ~= 'boolean' or plugSpec.enabled == false then
     plugSpec.enabled = false
     return plugSpec
@@ -127,7 +134,8 @@ function M.load(plugSpec)
       plugSpec.config()
     end
     if vim.fn.has('vim_starting') ~= 1 then
-      local plugin_directory_files = vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}', false, true)
+      local plugin_directory_files =
+        vim.fn.globpath(plugSpec.rtp, 'plugin/*.{lua,vim}', false, true)
       for _, f in ipairs(plugin_directory_files) do
         vim.cmd.source(f)
       end
