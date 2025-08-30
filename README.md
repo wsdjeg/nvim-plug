@@ -172,28 +172,28 @@ require('plug').add({
 
 The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
-| name            | description                                                                                                      |
-| --------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `[1]`           | `string`, plugin repo short name, `wsdjeg/flygrep.nvim`                                                          |
-| `cmds`          | `string` or `table<string>`, commands lazy loading                                                               |
-| `events`        | `string` or `table<string>`, events lazy loading                                                                 |
-| `config`        | `function`, function called after adding plugin path to nvim rtp, before loading files in `plugin/` directory    |
-| `config_after`  | `function`, function called after loading files in `plugin/` directory                                           |
-| `config_before` | `function`, function called when `plug.add()` function is called                                                 |
-| `on_ft`         | `string` or `table<string>`, filetypes lazy loading                                                              |
-| `on_map`        | `string` or `table<string>`, key bindings lazy loading                                                           |
-| `on_func`       | `string` or `table<string>`, vim function lazy loading                                                           |
-| `script_type`   | `string`, plugin type including `color`, `plugin`, etc..                                                         |
-| `build`         | `string` or `table<string>`, executed by [job](https://spacevim.org/api/job/) api                                |
-| `enabled`       | `boolean` or `function` evaluated when startup, when it is false, plugin will be skiped                          |
-| `frozen`        | update only when specific with `PlugUpdate name`                                                                 |
-| `depends`       | `table<PluginSpec>` a list of plugins                                                                            |
-| `branch`        | `string` specific git branch                                                                                     |
-| `tag`           | `string` specific git tag                                                                                        |
-| `type`          | `string` specific plugin type, this can be git, raw or none, if it is raw, `script_type` must be set             |
-| `autoload`      | `boolean`, load plugin after git clone                                                                           |
-| `priority`      | `number`, default is 50, set the order in which plugins are loaded                                               |
-| `fetch`         | If set to true, nvim-plug doesn't add the path to user runtimepath. It is useful to manager no-plugin repository |
+| name            | description                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `[1]`           | `string`, plugin repo short name, `wsdjeg/flygrep.nvim`                                                                     |
+| `cmds`          | `string`, or `table<string>`, commands lazy loading                                                                         |
+| `events`        | `string`, or `table<string>`, events lazy loading                                                                           |
+| `config`        | `function`, function called after adding plugin path to nvim rtp, before loading files in `plugin/` directory               |
+| `config_after`  | `function`, function called after loading files in `plugin/` directory                                                      |
+| `config_before` | `function`, function called when `plug.add()` function is called                                                            |
+| `on_ft`         | `string`, or `table<string>`, filetypes lazy loading                                                                        |
+| `on_map`        | `string`, or `table<string>`, key bindings lazy loading                                                                     |
+| `on_func`       | `string`, or `table<string>`, vim function lazy loading                                                                     |
+| `script_type`   | `string`, plugin type including `color`, `plugin`, etc..                                                                    |
+| `build`         | `string`, or `table<string>`, executed by [job](https://spacevim.org/api/job/) api                                          |
+| `enabled`       | `boolean`, or `function` evaluated when startup, when it is false, plugin will be skiped                                    |
+| `frozen`        | `booleadn`, update only when specific with `PlugUpdate name`                                                                |
+| `depends`       | `table<PluginSpec>`, a list of plugins                                                                                      |
+| `branch`        | `string`, specific git branch                                                                                               |
+| `tag`           | `string`, specific git tag                                                                                                  |
+| `type`          | `string`, specific plugin type, this can be git, raw or none, if it is raw, `script_type` must be set                       |
+| `autoload`      | `boolean`, load plugin after git clone                                                                                      |
+| `priority`      | `number`, default is 50, set the order in which plugins are loaded                                                          |
+| `fetch`         | `boolean`, If set to true, nvim-plug doesn't add the path to user runtimepath. It is useful to manager no-plugin repository |
 
 - `config` and `config_after` function will be not be called if the plugin has not been installed.
 - `priority` does not work for lazy plugins.
@@ -376,8 +376,7 @@ Like this plugin? Star the repository on
 GitHub.
 
 Love this plugin? Follow [me](https://wsdjeg.net/) on
-[GitHub](https://github.com/wsdjeg) and
-[Twitter](http://twitter.com/wsdtty).
+[GitHub](https://github.com/wsdjeg).
 
 ## Feedback
 
