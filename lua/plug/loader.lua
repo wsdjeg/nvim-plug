@@ -8,6 +8,7 @@
 local M = {}
 
 local config = require('plug.config')
+local log = require('plug.logger')
 
 local add_raw_rtp = false
 
@@ -119,6 +120,7 @@ end
 
 --- @param plugSpec PluginSpec
 function M.load(plugSpec)
+  log.info('load plug:' .. plugSpec.name)
   if
     plugSpec.rtp
     and vim.fn.isdirectory(plugSpec.rtp) == 1
@@ -143,6 +145,8 @@ function M.load(plugSpec)
         plugSpec.config_after()
       end
     end
+  else
+    log.info('failed to load plug:' .. plugSpec.name)
   end
 end
 
