@@ -7,8 +7,8 @@
 
 local M = {}
 
-M.bundle_dir = vim.fn.stdpath('data') .. '/bundle_dir'
-M.raw_plugin_dir = vim.fn.stdpath('data') .. '/bundle_dir/raw_plugin'
+M.bundle_dir = vim.fn.stdpath('data') .. '/repos'
+M.raw_plugin_dir = vim.fn.stdpath('data') .. '/repos/raw_plugin'
 M.max_processes = 5
 M.base_url = 'https://github.com'
 M.ui = 'default'

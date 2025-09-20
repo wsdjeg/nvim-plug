@@ -6,22 +6,22 @@
 
 <!-- vim-markdown-toc GFM -->
 
-* [Intro](#intro)
-* [Features](#features)
-* [Usage](#usage)
-    * [Installation](#installation)
-    * [Setup nvim-plug](#setup-nvim-plug)
-    * [Add plugins](#add-plugins)
-    * [`import` option](#import-option)
-    * [Self upgrade](#self-upgrade)
-* [Plugin Spec](#plugin-spec)
-* [Commands](#commands)
-* [Default UI](#default-ui)
-* [Notify UI](#notify-ui)
-* [Custom Plugin UI](#custom-plugin-ui)
-* [Plugin priority](#plugin-priority)
-* [Self-Promotion](#self-promotion)
-* [Feedback](#feedback)
+- [Intro](#intro)
+- [Features](#features)
+- [Usage](#usage)
+    - [Installation](#installation)
+    - [Setup nvim-plug](#setup-nvim-plug)
+    - [Add plugins](#add-plugins)
+    - [`import` option](#import-option)
+    - [Self upgrade](#self-upgrade)
+- [Plugin Spec](#plugin-spec)
+- [Commands](#commands)
+- [Default UI](#default-ui)
+- [Notify UI](#notify-ui)
+- [Custom Plugin UI](#custom-plugin-ui)
+- [Plugin priority](#plugin-priority)
+- [Self-Promotion](#self-promotion)
+- [Feedback](#feedback)
 
 <!-- vim-markdown-toc -->
 
@@ -41,34 +41,28 @@ There is also a [Chinese introduction](https://wsdjeg.net/neovim-plugin-manager-
 
 ### Installation
 
-Clone this repository.
-
-```
-git clone https://github.com/wsdjeg/nvim-plug.git D:/bundle_dir/wsdjeg/nvim-plug
-```
-
-and append the path of this repository to your neovim neovim runtimepath option:
-
-init.lua
-
-```lua
-vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/nvim-plug')
-```
-
 To install nvim-plug automatically:
 
 ```lua
-if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/nvim-plug') == 0 then
-  vim.fn.system({
-    'git',
-    'clone',
-    '--depth',
-    '1',
-    'https://github.com/wsdjeg/nvim-plug.git',
-    'D:/bundle_dir/wsdjeg/nvim-plug',
-  })
+local dir = vim.fn.stdpath('data') .. '/repos/'
+
+local function bootstrap(repo)
+  if vim.fn.isdirectory(dir .. repo) == 0 then
+    vim.fn.system({
+      'git',
+      'clone',
+      '--depth',
+      '1',
+      'https://github.com/' .. repo .. '.git',
+      dir .. repo,
+    })
+  end
+  vim.opt.runtimepath:append(dir .. repo)
 end
-vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/nvim-plug')
+
+bootstrap('wsdjeg/job.nvim')
+bootstrap('wsdjeg/logger.nvim')
+bootstrap('wsdjeg/nvim-plug')
 ```
 
 ### Setup nvim-plug

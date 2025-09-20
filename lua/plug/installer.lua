@@ -9,7 +9,7 @@ local M = {}
 
 local H = {}
 
-local job = require('spacevim.api.job')
+local job = require('job')
 local config = require('plug.config')
 local loader = require('plug.loader')
 
