@@ -12,6 +12,7 @@ local H = {}
 local job = require('job')
 local config = require('plug.config')
 local loader = require('plug.loader')
+local log = require('plug.logger')
 
 local on_uidate
 
@@ -129,6 +130,7 @@ function H.install_plugin(plugSpec)
   table.insert(cmd, plugSpec.url)
   table.insert(cmd, plugSpec.path)
   on_uidate(plugSpec.name, { command = 'clone', clone_process = '' })
+  log.info('downloading ' .. plugSpec.name .. ':' .. vim.inspect(cmd))
   local jobid = job.start(cmd, {
     on_stderr = function(id, data)
       for _, v in ipairs(data) do
@@ -161,6 +163,7 @@ function H.install_plugin(plugSpec)
       https_proxy = config.https_proxy,
     },
   })
+  log.info('jobid is ' .. jobid)
   processes = processes + 1
 end
 
@@ -224,7 +227,7 @@ end
 M.install = function(plugSpecs)
   for _, v in ipairs(plugSpecs) do
     if v.is_local then
-      on_uidate(v.name, {is_local = true})
+      on_uidate(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v)
     else
@@ -236,7 +239,7 @@ end
 M.update = function(plugSpecs, force)
   for _, v in ipairs(plugSpecs) do
     if v.is_local then
-      on_uidate(v.name, {is_local = true})
+      on_uidate(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v, force)
     else
