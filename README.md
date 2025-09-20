@@ -67,12 +67,14 @@ bootstrap('wsdjeg/nvim-plug')
 
 ### Setup nvim-plug
 
+The following is the default option of nvim-plug.
+
 ```lua
 require('plug').setup({
   -- set the bundle dir
-  bundle_dir = 'D:/bundle_dir',
+  bundle_dir = vim.fn.stdpath('data') .. '/repos',
   -- set the path where raw plugin is download to
-  raw_plugin_dir = 'D:/bundle_dir/raw_plugin',
+  raw_plugin_dir = vim.fn.stdpath('data') .. '/repos/raw_plugin',
   -- max number of processes used for nvim-plug job
   max_processes = 5,
   base_url = 'https://github.com',
@@ -87,7 +89,7 @@ require('plug').setup({
   -- default history depth for `git clone`
   clone_depth = 1,
   -- plugin priority, readme [plugin priority] for more info
-  enable_priority = false
+  enable_priority = false,
 })
 ```
 
