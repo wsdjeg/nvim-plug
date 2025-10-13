@@ -34,7 +34,8 @@ function M._open_url(entry)
 end
 
 function M._tabnew_lcd(entry)
-  require('rooter').open(entry.value.path)
+    vim.cmd('tabnew')
+    vim.cmd('lcd ' .. entry.value.path)
 end
 
 M.preview_win = true
