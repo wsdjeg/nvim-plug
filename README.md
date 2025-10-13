@@ -191,9 +191,11 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 | `autoload`      | `boolean`, load plugin after git clone                                                                                      |
 | `priority`      | `number`, default is 50, set the order in which plugins are loaded                                                          |
 | `fetch`         | `boolean`, If set to true, nvim-plug doesn't add the path to user runtimepath. It is useful to manager no-plugin repository |
+| `dev`           | `boolead`, default is false, if true, then dev path will be used instead if bundle path                                     |
 
 - `config` and `config_after` function will be not be called if the plugin has not been installed.
 - `priority` does not work for lazy plugins.
+- dev path works only when exists. nvim-plug will not clone repos into dev_path
 
 ## Commands
 
