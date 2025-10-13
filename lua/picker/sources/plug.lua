@@ -19,7 +19,7 @@ end
 function M.default_action(entry)
     terminal.open(entry.value.path)
     -- make sure it is terminal mode
-    vim.cmd('moautocmd startinsert')
+    vim.cmd('noautocmd startinsert')
 end
 
 M.preview_win = true
