@@ -20,6 +20,7 @@
 - [Notify UI](#notify-ui)
 - [Custom Plugin UI](#custom-plugin-ui)
 - [Plugin priority](#plugin-priority)
+- [Picker sources](#picker-sources)
 - [Self-Promotion](#self-promotion)
 - [Feedback](#feedback)
 
@@ -365,6 +366,19 @@ require('plug').add({
 })
 require('plug').load()
 ```
+
+## Picker sources
+
+nvim-plug also provides a source for [picker.nvim](https://github.com/wsdjeg/picker.nvim),
+which can be opened by following command:
+
+```
+:Picker plug
+```
+
+| action         | key binding | description                                                       |
+| -------------- | ----------- | ----------------------------------------------------------------- |
+| default_action | `<Enter>`   | open floating terminal with the root directory of selected plugin |
 
 ## Self-Promotion
 
