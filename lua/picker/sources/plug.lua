@@ -1,6 +1,5 @@
 local M = {}
 local plug = require('plug')
-local terminal = require('terminal')
 
 local previewer = require('picker.previewer.file')
 
@@ -18,19 +17,24 @@ end
 
 function M.actions()
   return {
-    ['<Enter>'] = M.default_action,
+    ['<C-t>'] = M.default_action,
     ['<C-b>'] = M._open_url,
+    ['<Enter>'] = M._tabnew_lcd,
   }
 end
 
 function M.default_action(entry)
-  terminal.open(entry.value.path)
+  require('terminal').open(entry.value.path)
   -- make sure it is terminal mode
   vim.cmd('noautocmd startinsert')
 end
 
 function M._open_url(entry)
   vim.ui.open(entry.value.url)
+end
+
+function M._tabnew_lcd(entry)
+  require('rooter').open(entry.value.path)
 end
 
 M.preview_win = true

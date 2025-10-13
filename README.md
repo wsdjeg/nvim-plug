@@ -376,9 +376,11 @@ which can be opened by following command:
 :Picker plug
 ```
 
-| action         | key binding | description                                                       |
-| -------------- | ----------- | ----------------------------------------------------------------- |
-| default_action | `<Enter>`   | open floating terminal with the root directory of selected plugin |
+| action        | key binding | description                                                                                                        |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| open_terminal | `<C-t>`     | open floating terminal with plugin.dir, need [terminal.nvim](https://github.com/wsdjeg/terminal.nvim).             |
+| open_plug_url | `<C-b>`     | open the url of selected plugin via default browser.                                                               |
+| tabnew_lcd    | `<Enter>`   | create new tab, change current dir to the plugin root , need [rooter.nvim](https://github.com/wsdjeg/rooter.nvim). |
 
 ## Self-Promotion
 
