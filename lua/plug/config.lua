@@ -27,6 +27,7 @@ function M.setup(opt)
   M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
   M.enable_priority = opt.enable_priority or M.enable_priority
   M.import = opt.import or M.import
+  M.dev_path = opt.dev_path or M.dev_path
 end
 
 return M
