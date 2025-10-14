@@ -13,18 +13,18 @@ local log = require('plug.logger')
 local add_raw_rtp = false
 
 --- @class PluginSpec
---- @field rtp string
---- @field events table<string>
---- @field cmds table<string>
---- @field name string
---- @field branch string
---- @field tag string
---- @field url string
---- @field path string
---- @field build string|table<string>
+--- @field rtp string default rtp path
+--- @field events table<string> lazy events to load this plugin
+--- @field cmds table<string> lazy cmds to load this plugins
+--- @field name string plugin name
+--- @field branch string branch name
+--- @field tag string tag name
+--- @field url string upstream url
+--- @field path string download path
+--- @field build string|table<string> build commands
 --- @field is_local boolean true for local plugin
 --- @field when boolean|string|function
---- @field frozen boolean
+--- @field frozen boolean if set to true, :PlugUpdate will not update this plugin without bang
 --- @field type string "git", "raw" or "none"
 --- @field script_type string "git", "raw" or "none"
 --- @field config function function called after update rtp
@@ -35,6 +35,8 @@ local add_raw_rtp = false
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
 --- @field loaded? boolean
 --- @field enabled? boolean
+--- @field dev? boolean # if set to true, dev_path will be used if it is existed.
+--- @field dev_path? string development directory of the plugin
 
 --- @param plugSpec PluginSpec
 --- @return boolean
