@@ -174,6 +174,8 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 | `[1]`           | `string`, plugin repo short name, `wsdjeg/flygrep.nvim`                                                                     |
 | `cmds`          | `string`, or `table<string>`, commands lazy loading                                                                         |
 | `events`        | `string`, or `table<string>`, events lazy loading                                                                           |
+| `keys`          | `table`, key bindings for this plugin                                                                                       |
+| `opts`          | `table`, setup opts for this plugin                                                                                         |
 | `config`        | `function`, function called after adding plugin path to nvim rtp, before loading files in `plugin/` directory               |
 | `config_after`  | `function`, function called after loading files in `plugin/` directory                                                      |
 | `config_before` | `function`, function called when `plug.add()` function is called                                                            |
