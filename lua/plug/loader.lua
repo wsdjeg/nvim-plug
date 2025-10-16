@@ -61,11 +61,7 @@ end
 --- @param name string
 --- @return string
 local function get_default_module(name)
-  if vim.endswith(name, '.nvim') then
-    return string.sub(name, #name - 5)
-  elseif vim.startswith(name, 'nvim-') then
-    return string.sub(name, 6, #name)
-  end
+  return name:lower():gsub('[%.%-]lua$', ''):gsub('^n?vim-', ''):gsub('[%.%-]vim')
 end
 
 --- @param plugSpec PluginSpec
