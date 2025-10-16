@@ -29,6 +29,13 @@ function M.add(plugins, skip_deps)
         goto continue
       end
       all_plugins[plug.name] = plug
+      if plug.keys then
+        for _, key in ipairs(plug.keys) do
+          pcall(function()
+            vim.keymap.set(unpack(key))
+          end)
+        end
+      end
       if plug.cmds then
         hooks.on_cmds(plug.cmds, plug)
       end

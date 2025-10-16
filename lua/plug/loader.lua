@@ -159,13 +159,6 @@ function M.load(plugSpec)
       vim.opt.runtimepath:append(rtp .. '/after')
     end
     plugSpec.loaded = true
-    if plugSpec.keys then
-      for _, key in ipairs(plugSpec.keys) do
-        pcall(function()
-          vim.keymap.set(unpack(key))
-        end)
-      end
-    end
     if plugSpec.opts then
       if plugSpec.module then
         require(plugSpec.module).setup(plugSpec.opts)
