@@ -61,7 +61,7 @@ end
 --- @param name string
 --- @return string
 local function get_default_module(name)
-  return name:lower():gsub('[%.%-]lua$', ''):gsub('^n?vim-', ''):gsub('[%.%-]vim')
+  return name:lower():gsub('[%.%-]lua$', ''):gsub('^n?vim-', ''):gsub('[%.%-]n?vim', '')
 end
 
 --- @param plugSpec PluginSpec
@@ -157,7 +157,18 @@ function M.load(plugSpec)
     plugSpec.loaded = true
     if plugSpec.opts then
       if plugSpec.module then
-        require(plugSpec.module).setup(plugSpec.opts)
+        local ok, module = pcall(require, plugSpec.module)
+        if ok then
+          if module.setup then
+            module.setup(plugSpec.opts)
+          else
+            log.info(string.format('%s does not provide setup func', plugSpec.name))
+          end
+        else
+          log.info(
+            string.format('failed to require %s module for %s', plugSpec.module, plugSpec.name)
+          )
+        end
       else
         log.info('failed to set default module name for ' .. plugSpec.name)
       end
