@@ -58,6 +58,16 @@ local function check_name(plugSpec)
   return s[#s]
 end
 
+--- @param name string
+--- @return string
+local function get_default_module(name)
+  if vim.endswith(name, '.nvim') then
+    return string.sub(name, #name - 5)
+  elseif vim.startswith(name, 'nvim-') then
+    return string.sub(name, 6, #name)
+  end
+end
+
 --- @param plugSpec PluginSpec
 function M.parser(plugSpec)
   if type(plugSpec.enabled) == 'nil' then
@@ -76,15 +86,18 @@ function M.parser(plugSpec)
     return plugSpec
   end
   plugSpec.name = check_name(plugSpec)
+  if not plugSpec.module then
+    plugSpec.module = get_default_module(plugSpec.name)
+  end
   if #plugSpec.name == 0 then
     plugSpec.enabled = false
     return plugSpec
   end
   if plugSpec.dev then
-      local dev_path = config.dev_path .. plugSpec[1]
-      if vim.fn.isdirectory(dev_path) == 1 then
-          plugSpec.dev_path = dev_path
-      end
+    local dev_path = config.dev_path .. plugSpec[1]
+    if vim.fn.isdirectory(dev_path) == 1 then
+      plugSpec.dev_path = dev_path
+    end
   end
   if is_local_plugin(plugSpec) then
     plugSpec.rtp = plugSpec[1]
@@ -137,21 +150,34 @@ function M.load(plugSpec)
   then
     local rtp
     if plugSpec.dev and plugSpec.dev_path then
-        rtp = plugSpec.dev_path
+      rtp = plugSpec.dev_path
     else
-        rtp = plugSpec.rtp
+      rtp = plugSpec.rtp
     end
     vim.opt.runtimepath:prepend(rtp)
     if vim.fn.isdirectory(rtp .. '/after') == 1 then
       vim.opt.runtimepath:append(rtp .. '/after')
     end
     plugSpec.loaded = true
+    if plugSpec.keys then
+      for _, key in ipairs(plugSpec.keys) do
+        pcall(function()
+          vim.keymap.set(unpack(key))
+        end)
+      end
+    end
+    if plugSpec.opts then
+      if plugSpec.module then
+        require(plugSpec.module).setup(plugSpec.opts)
+      else
+        log.info('failed to set default module name for ' .. plugSpec.name)
+      end
+    end
     if type(plugSpec.config) == 'function' then
       plugSpec.config()
     end
     if vim.fn.has('vim_starting') ~= 1 then
-      local plugin_directory_files =
-        vim.fn.globpath(rtp, 'plugin/*.{lua,vim}', false, true)
+      local plugin_directory_files = vim.fn.globpath(rtp, 'plugin/*.{lua,vim}', false, true)
       for _, f in ipairs(plugin_directory_files) do
         vim.cmd.source(f)
       end
