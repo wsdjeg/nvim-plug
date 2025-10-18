@@ -9,6 +9,7 @@ local M = {}
 
 local config = require('plug.config')
 local log = require('plug.logger')
+local clock = require('plug.clock')
 
 local add_raw_rtp = false
 
@@ -137,13 +138,13 @@ end
 
 --- @param plugSpec PluginSpec
 function M.load(plugSpec)
-  log.info('load plug:' .. plugSpec.name)
   if
     plugSpec.rtp
     and vim.fn.isdirectory(plugSpec.rtp) == 1
     and not plugSpec.loaded
     and not plugSpec.fetch
   then
+    clock.start()
     local rtp
     if plugSpec.dev and plugSpec.dev_path then
       rtp = plugSpec.dev_path
@@ -185,8 +186,7 @@ function M.load(plugSpec)
         plugSpec.config_after()
       end
     end
-  else
-    log.info('failed to load plug:' .. plugSpec.name)
+    log.info(string.format('load plug: %s in %sms', plugSpec.name, clock.time()))
   end
 end
 
