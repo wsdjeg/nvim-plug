@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.5.0](https://github.com/wsdjeg/nvim-plug/compare/v0.4.0...v0.5.0) (2025-10-18)
+
+
+### Features
+
+* add _tabnew_lcd action ([cc6596f](https://github.com/wsdjeg/nvim-plug/commit/cc6596fe17f16fc8591993b2cdee89f8d5877aa8))
+* add `keys` and `opts` to plugSpec ([9f24aba](https://github.com/wsdjeg/nvim-plug/commit/9f24aba5b30741216570be14e28d16848f806898))
+* add actions for picker source ([f894a3b](https://github.com/wsdjeg/nvim-plug/commit/f894a3b7cda80c2ae989d5c1a6f75e46aec65926))
+* add clock module ([6694d34](https://github.com/wsdjeg/nvim-plug/commit/6694d3471d07f71b7fa6dc7ea804897d87478c7e))
+* add picker source ([60dec62](https://github.com/wsdjeg/nvim-plug/commit/60dec62a752f0d1dd7994307ac16dfe0e1081a48))
+* add plugSpec.dev ([1db4403](https://github.com/wsdjeg/nvim-plug/commit/1db4403c91ab17fb774d9de1ce3e2805285d9afd))
+
+
+### Bug Fixes
+
+* fix get_default_module function ([e75894c](https://github.com/wsdjeg/nvim-plug/commit/e75894ce06c071979748a7c2fd29b7df78112599))
+* fix known project.path ([018f177](https://github.com/wsdjeg/nvim-plug/commit/018f17723ecc3443844a91bd256b55a3ff26ac2d))
+* handle opts setup error ([62eb5df](https://github.com/wsdjeg/nvim-plug/commit/62eb5dff7e51751795e2cf0d5b55177d50b69b59))
+* make sure keys init before lazy cmd ([cdbfae7](https://github.com/wsdjeg/nvim-plug/commit/cdbfae754b6a07b47f75c4ba409d5bd57a808abd))
+* set dev_path ([50c4a93](https://github.com/wsdjeg/nvim-plug/commit/50c4a9328aad4c15249b4c43a1968fac0a7dfb97))
+* startinsert in terminal ([636d488](https://github.com/wsdjeg/nvim-plug/commit/636d488ac834a6fb82f9104038a3ff401fe079e0))
+
 ## [0.4.0](https://github.com/wsdjeg/nvim-plug/compare/v0.3.1...v0.4.0) (2025-09-20)
 
 
