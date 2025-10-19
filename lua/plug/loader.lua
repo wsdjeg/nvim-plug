@@ -14,23 +14,26 @@ local clock = require('plug.clock')
 local add_raw_rtp = false
 
 --- @class PluginSpec
---- @field rtp string default rtp path
---- @field events table<string> lazy events to load this plugin
---- @field cmds table<string> lazy cmds to load this plugins
---- @field name string plugin name
---- @field branch string branch name
---- @field tag string tag name
---- @field url string upstream url
---- @field path string download path
---- @field build string|table<string> build commands
---- @field is_local boolean true for local plugin
+--- @field [1] string repo
+--- @field rtp? string default rtp path
+--- @field events? table<string> lazy events to load this plugin
+--- @field cmds? table<string> lazy cmds to load this plugins
+--- @field name? string plugin name
+--- @field branch? string branch name
+--- @field tag? string tag name
+--- @field url? string upstream url
+--- @field path? string download path
+--- @field build? string|table<string> build commands
+--- @field is_local? boolean true for local plugin
 --- @field when boolean|string|function
---- @field frozen boolean if set to true, :PlugUpdate will not update this plugin without bang
---- @field type string "git", "raw" or "none"
---- @field script_type string "git", "raw" or "none"
---- @field config function function called after update rtp
---- @field config_before function function called after update rtp
---- @field config_after function function called after update rtp
+--- @field frozen? boolean if set to true, :PlugUpdate will not update this plugin without bang
+--- @field type? string "git", "raw" or "none"
+--- @field script_type? string "git", "raw" or "none"
+--- @field opts? table plugin setup opts
+--- @field keys? table list of key bindings
+--- @field config? function function called after update rtp
+--- @field config_before? function function called after update rtp
+--- @field config_after? function function called after update rtp
 --- @field hook_install_done? function
 --- @field autoload? boolean
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
