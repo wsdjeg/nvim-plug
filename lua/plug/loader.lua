@@ -38,6 +38,7 @@ local add_raw_rtp = false
 --- @field enabled? boolean
 --- @field dev? boolean # if set to true, dev_path will be used if it is existed.
 --- @field dev_path? string development directory of the plugin
+--- @field load_time? integer loading time in ms
 
 --- @param plugSpec PluginSpec
 --- @return boolean
@@ -186,7 +187,8 @@ function M.load(plugSpec)
         plugSpec.config_after()
       end
     end
-    log.info(string.format('load plug: %s in %sms', plugSpec.name, clock.time()))
+    plugSpec.load_time = clock.time()
+    log.info(string.format('load plug: %s in %sms', plugSpec.name, plugSpec.load_time))
   end
 end
 
