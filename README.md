@@ -384,6 +384,7 @@ which can be opened by following command:
 | ------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
 | open_terminal | `<C-t>`     | open floating terminal with plugin.dir, need [terminal.nvim](https://github.com/wsdjeg/terminal.nvim). |
 | open_plug_url | `<C-b>`     | open the url of selected plugin via default browser.                                                   |
+| copy_plug_url | `<C-y>`     | copy the url of selected plugin, use register `"`.                                                     |
 | tabnew_lcd    | `<Enter>`   | create new tab, change current dir to the plugin root                                                  |
 
 ## Self-Promotion

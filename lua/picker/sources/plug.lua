@@ -20,6 +20,7 @@ function M.actions()
     ['<C-t>'] = M.default_action,
     ['<C-b>'] = M._open_url,
     ['<Enter>'] = M._tabnew_lcd,
+    ['<C-y>'] = M._copu_url,
   }
 end
 
@@ -34,8 +35,12 @@ function M._open_url(entry)
 end
 
 function M._tabnew_lcd(entry)
-    vim.cmd('tabnew')
-    vim.cmd('lcd ' .. entry.value.path)
+  vim.cmd('tabnew')
+  vim.cmd('lcd ' .. entry.value.path)
+end
+
+function M._copu_url(entry)
+    vim.fn.setreg('"', entry.value.url)
 end
 
 M.preview_win = true
