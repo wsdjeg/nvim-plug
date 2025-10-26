@@ -26,8 +26,9 @@ end
 
 function M.default_action(entry)
   require('terminal').open(entry.value.path)
-  -- make sure it is terminal mode
-  vim.cmd('noautocmd startinsert')
+  vim.fn.timer_start(200, function()
+    vim.cmd('noautocmd startinsert')
+  end)
 end
 
 function M._open_url(entry)
@@ -40,7 +41,7 @@ function M._tabnew_lcd(entry)
 end
 
 function M._copu_url(entry)
-    vim.fn.setreg('"', entry.value.url)
+  vim.fn.setreg('"', entry.value.url)
 end
 
 M.preview_win = true
