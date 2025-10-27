@@ -201,8 +201,10 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
 ## Commands
 
-- `:PlugInstall`: install specific plugin or all plugins
-- `:PlugUpdate`: update specific plugin or all plugins
+- `:Plug install`: install specific plugin or all plugins
+- `:Plug update`: update specific plugin or all plugins
+
+`:PlugInstall` and `:PlugUpdate` is deprecated, and will be removed when 1.0.0 released.
 
 ## Default UI
 

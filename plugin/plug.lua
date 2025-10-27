@@ -66,3 +66,12 @@ end, {
   nargs = '*',
   complete = complete,
 })
+
+vim.api.nvim_create_user_command('Plug', function(opt)
+  require('plug.command').run(opt)
+end, {
+  nargs = '*',
+  complete = function(a, b, c)
+    return require('plug.command').complete(a, b, c)
+  end,
+})
