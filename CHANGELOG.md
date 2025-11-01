@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/wsdjeg/nvim-plug/compare/v0.5.0...v0.5.1) (2025-11-01)
+
+
+### Bug Fixes
+
+* fix `:Plug update` ([a949e99](https://github.com/wsdjeg/nvim-plug/commit/a949e9958f4e0c4a921fbfa33f158fefdfd35e0c))
+
 ## [0.5.0](https://github.com/wsdjeg/nvim-plug/compare/v0.4.0...v0.5.0) (2025-10-30)
 
 
