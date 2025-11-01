@@ -25,7 +25,7 @@ function M.run(opt)
   elseif #opt.fargs > 0 and opt.fargs[1] == 'update' then
     local plugs = {}
     local all_plugins = require('plug').get()
-    if #opt.fargs == 0 then
+    if #opt.fargs == 1 then
       for _, v in pairs(all_plugins) do
         table.insert(plugs, v)
       end
