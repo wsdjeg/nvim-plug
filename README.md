@@ -183,7 +183,7 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 | `on_map`        | `string`, or `table<string>`, key bindings lazy loading                                                                     |
 | `on_func`       | `string`, or `table<string>`, vim function lazy loading                                                                     |
 | `script_type`   | `string`, plugin type including `color`, `plugin`, etc..                                                                    |
-| `build`         | `string`, or `table<string>`, executed by [job](https://spacevim.org/api/job/) api                                          |
+| `build`         | `string`, or `table<string>`, executed by [job.nvim](https://github.com/wsdjeg/job.nvim)                                    |
 | `enabled`       | `boolean`, or `function` evaluated when startup, when it is false, plugin will be skiped                                    |
 | `frozen`        | `booleadn`, update only when specific with `PlugUpdate name`                                                                |
 | `depends`       | `table<PluginSpec>`, a list of plugins                                                                                      |
@@ -198,6 +198,7 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 - `config` and `config_after` function will be not be called if the plugin has not been installed.
 - `priority` does not work for lazy plugins.
 - dev path works only when exists. nvim-plug will not clone repos into dev_path
+- `keys` is not lazy mapping, use `on_map` instead.
 
 ## Commands
 

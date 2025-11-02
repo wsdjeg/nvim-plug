@@ -181,6 +181,15 @@ function M.load(plugSpec)
     if type(plugSpec.config) == 'function' then
       plugSpec.config()
     end
+    -- if on_map contains key in plugSpec.keys, it will be cleared by nvim-plug on_map hook.
+    -- so we need to reset them.
+    if plugSpec.keys then
+      for _, key in ipairs(plugSpec.keys) do
+        pcall(function()
+          vim.keymap.set(unpack(key))
+        end)
+      end
+    end
     if vim.fn.has('vim_starting') ~= 1 then
       local plugin_directory_files = vim.fn.globpath(rtp, 'plugin/*.{lua,vim}', false, true)
       for _, f in ipairs(plugin_directory_files) do
