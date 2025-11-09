@@ -119,7 +119,7 @@ function M.on_map(maps, plugSpec)
       end
 
       vim.fn.feedkeys(vim.api.nvim_replace_termcodes(lhs .. input, false, true, true), 'm')
-    end, {})
+    end, {silent = true, desc = plugSpec.name .. ' on_map hooks'})
   end
 end
 
