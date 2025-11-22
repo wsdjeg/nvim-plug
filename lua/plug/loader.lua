@@ -42,6 +42,7 @@ local add_raw_rtp = false
 --- @field dev? boolean # if set to true, dev_path will be used if it is existed.
 --- @field dev_path? string development directory of the plugin
 --- @field load_time? integer loading time in ms
+--- @field module? string lua main module name
 
 --- @param plugSpec PluginSpec
 --- @return boolean
