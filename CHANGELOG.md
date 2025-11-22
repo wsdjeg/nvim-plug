@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/wsdjeg/nvim-plug/compare/v0.5.0...v0.6.0) (2025-11-22)
+
+
+### Features
+
+* add on_map desc ([b329373](https://github.com/wsdjeg/nvim-plug/commit/b32937333e4783ea74139e2d8e57d4984c36d573))
+
+
+### Bug Fixes
+
+* fix `:Plug update` ([a949e99](https://github.com/wsdjeg/nvim-plug/commit/a949e9958f4e0c4a921fbfa33f158fefdfd35e0c))
+* fix on_map logic ([6f2ea6b](https://github.com/wsdjeg/nvim-plug/commit/6f2ea6b1465be9737c35efd9cbae6d47b5809731))
+* fix PluginSpec field ([7e3722a](https://github.com/wsdjeg/nvim-plug/commit/7e3722aa2377c79afd4e53182c2d75115d9b52de))
+
 ## [0.5.0](https://github.com/wsdjeg/nvim-plug/compare/v0.4.0...v0.5.0) (2025-10-30)
 
 
