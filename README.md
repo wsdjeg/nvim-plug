@@ -1,6 +1,10 @@
 # nvim-plug
 
-[![GPLv3 License](https://img.spacevim.org/license-GPLv3-blue.svg)](LICENSE)
+[![GitHub License](https://img.shields.io/github/license/wsdjeg/nvim-plug.nvim)](LICENSE)
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/wsdjeg/nvim-plug.nvim)](https://github.com/wsdjeg/nvim-plug.nvim/issues)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/wsdjeg/nvim-plug.nvim)](https://github.com/wsdjeg/nvim-plug.nvim/commits/master/)
+[![GitHub Release](https://img.shields.io/github/v/release/wsdjeg/nvim-plug.nvim)](https://github.com/wsdjeg/nvim-plug.nvim/releases)
+[![luarocks](https://img.shields.io/luarocks/v/wsdjeg/nvim-plug.nvim)](https://luarocks.org/modules/wsdjeg/nvim-plug.nvim)
 
 ![nvim-plug](https://wsdjeg.net/images/nvim-plug.gif)
 
@@ -65,6 +69,13 @@ bootstrap('wsdjeg/job.nvim')
 bootstrap('wsdjeg/logger.nvim')
 bootstrap('wsdjeg/nvim-plug')
 ```
+
+Using [luarocks](https://luarocks.org/)
+
+```
+luarocks install nvim-plug
+```
+
 
 ### Setup nvim-plug
 
