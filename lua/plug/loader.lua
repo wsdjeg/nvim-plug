@@ -117,6 +117,7 @@ function M.parser(plugSpec)
         add_raw_rtp = true
       end
     end
+  elseif plugSpec.type == 'rocks' then
   elseif not plugSpec.script_type or plugSpec.script_type == 'none' then
     plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
     plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1]
@@ -143,6 +144,9 @@ end
 
 --- @param plugSpec PluginSpec
 function M.load(plugSpec)
+  if plugSpec.type == 'rocks' and not plugSpec.rtp then
+      require('plug.rocks').set_rtp(plugSpec)
+  end
   if
     plugSpec.rtp
     and vim.fn.isdirectory(plugSpec.rtp) == 1

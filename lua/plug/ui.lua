@@ -82,6 +82,14 @@ local function build_context()
       else
         table.insert(b, '- ' .. k .. string.format(' downloading'))
       end
+    elseif plug.command == 'luarocks' then
+      if plug.luarocks_done then
+        table.insert(b, '√ ' .. k .. ' luarocks install done')
+      elseif plug.luarocks_done == false then
+        table.insert(b, '× ' .. k .. ' luarocks install failed')
+      else
+        table.insert(b, '- ' .. k .. string.format(' luarocks installing'))
+      end
     end
   end
 

@@ -16,6 +16,7 @@ M.ui = 'default'
 M.clone_depth = '1'
 M.import = 'plugins'
 M.enable_priority = false
+M.enable_luarocks = false
 function M.setup(opt)
   M.bundle_dir = opt.bundle_dir or M.bundle_dir
   M.max_processes = opt.max_processes or M.max_processes
@@ -28,6 +29,10 @@ function M.setup(opt)
   M.enable_priority = opt.enable_priority or M.enable_priority
   M.import = opt.import or M.import
   M.dev_path = opt.dev_path or M.dev_path
+  M.enable_luarocks = opt.enable_luarocks or M.enable_luarocks
+  if M.enable_luarocks then
+    require('plug.rocks').enable()
+  end
 end
 
 return M

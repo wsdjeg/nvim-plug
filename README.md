@@ -10,41 +10,41 @@
 
 <!-- vim-markdown-toc GFM -->
 
-- [Intro](#intro)
-- [Features](#features)
-- [Usage](#usage)
-    - [Installation](#installation)
-    - [Setup nvim-plug](#setup-nvim-plug)
+- [📘 Intro](#-intro)
+- [✨ Features](#-features)
+- [📦 Installation](#-installation)
+- [🔧 Configuration](#-configuration)
+- [⚙️ Basic Usage](#-basic-usage)
     - [Add plugins](#add-plugins)
     - [`import` option](#import-option)
     - [Self upgrade](#self-upgrade)
-- [Plugin Spec](#plugin-spec)
-- [Commands](#commands)
-- [Default UI](#default-ui)
-- [Notify UI](#notify-ui)
-- [Custom Plugin UI](#custom-plugin-ui)
-- [Plugin priority](#plugin-priority)
-- [Picker sources](#picker-sources)
-- [Self-Promotion](#self-promotion)
-- [Feedback](#feedback)
+- [📄 Plugin Spec](#-plugin-spec)
+- [💻 Commands](#-commands)
+- [🎨 UI](#-ui)
+    - [Default UI](#default-ui)
+    - [Notify UI](#notify-ui)
+    - [Custom Plugin UI](#custom-plugin-ui)
+- [📊 Plugin priority](#-plugin-priority)
+- [🔍 Picker sources](#-picker-sources)
+- [📣 Self-Promotion](#-self-promotion)
+- [💬 Feedback](#-feedback)
 
 <!-- vim-markdown-toc -->
 
-## Intro
+## 📘 Intro
 
 nvim-plug is an asynchronous Neovim plugin manager written in Lua.
 There is also a [Chinese introduction](https://wsdjeg.net/neovim-plugin-manager-nvim-plug/) about this plugin.
 
-## Features
+## ✨ Features
 
-- **faster:** written in lua.
-- **async:** downloading and building via job.
-- **lazy loading:** lazy load plugin based on events, comamnd, mapping, etc..
-- **custom UI:** provide custom UI API.
+- **🚀 Fast** — Fully implemented in Lua for minimal overhead and quick startup.
+- **⚡ Asynchronous operations** — Plugin download and build steps run in parallel using Neovim jobs.
+- **🛌 Flexible lazy-loading** — Load plugins on events, commands, mappings, filetypes, and more.
+- **📦 LuaRocks integration** — Install and manage LuaRocks dependencies seamlessly alongside plugins.
+- **🎨 Custom UI** — Provides an extensible UI API for building your own installation/update interface.
 
-## Usage
-
-### Installation
+## 📦 Installation
 
 To install nvim-plug automatically:
 
@@ -76,8 +76,7 @@ Using [luarocks](https://luarocks.org/)
 luarocks install nvim-plug
 ```
 
-
-### Setup nvim-plug
+## 🔧 Configuration
 
 The following is the default option of nvim-plug.
 
@@ -104,6 +103,8 @@ require('plug').setup({
   enable_priority = false,
 })
 ```
+
+## ⚙️ Basic Usage
 
 ### Add plugins
 
@@ -176,7 +177,7 @@ require('plug').add({
 })
 ```
 
-## Plugin Spec
+## 📄 Plugin Spec
 
 The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
@@ -200,7 +201,7 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 | `depends`       | `table<PluginSpec>`, a list of plugins                                                                                      |
 | `branch`        | `string`, specific git branch                                                                                               |
 | `tag`           | `string`, specific git tag                                                                                                  |
-| `type`          | `string`, specific plugin type, this can be git, raw or none, if it is raw, `script_type` must be set                       |
+| `type`          | `string`, specific plugin type, this can be git, rocks, raw or none, if it is raw, `script_type` must be set                |
 | `autoload`      | `boolean`, load plugin after git clone                                                                                      |
 | `priority`      | `number`, default is 50, set the order in which plugins are loaded                                                          |
 | `fetch`         | `boolean`, If set to true, nvim-plug doesn't add the path to user runtimepath. It is useful to manager no-plugin repository |
@@ -211,14 +212,16 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 - dev path works only when exists. nvim-plug will not clone repos into dev_path
 - `keys` is not lazy mapping, use `on_map` instead.
 
-## Commands
+## 💻 Commands
 
 - `:Plug install`: install specific plugin or all plugins
 - `:Plug update`: update specific plugin or all plugins
 
 `:PlugInstall` and `:PlugUpdate` is deprecated, and will be removed when 1.0.0 released.
 
-## Default UI
+## 🎨 UI
+
+### Default UI
 
 The default is ui is inspired by [vundle](https://github.com/VundleVim/Vundle.vim)
 
@@ -242,7 +245,7 @@ vim.cmd('hi def link PlugFailed WarningMsg')
 vim.cmd('hi def link PlugDoing Number')
 ```
 
-## Notify UI
+### Notify UI
 
 You can also change the ui to `notify`:
 
@@ -309,7 +312,7 @@ require('plug').add({
 })
 ```
 
-## Custom Plugin UI
+### Custom Plugin UI
 
 To setup custom UI, you need to creat a on_update function, this function is called with two arges, `name` and `plugUiData`.
 
@@ -343,7 +346,7 @@ require('plug').setup({
 })
 ```
 
-## Plugin priority
+## 📊 Plugin priority
 
 By default this feature is disabled, plugins will be loaded when run `add({plugins})` function.
 To enable plugin priority feature, you need to call `plug.load()` after `plug.add()` function.
@@ -385,7 +388,7 @@ require('plug').add({
 require('plug').load()
 ```
 
-## Picker sources
+## 🔍 Picker sources
 
 nvim-plug also provides a source for [picker.nvim](https://github.com/wsdjeg/picker.nvim),
 which can be opened by following command:
@@ -401,7 +404,7 @@ which can be opened by following command:
 | copy_plug_url | `<C-y>`     | copy the url of selected plugin, use register `"`.                                                     |
 | tabnew_lcd    | `<Enter>`   | create new tab, change current dir to the plugin root                                                  |
 
-## Self-Promotion
+## 📣 Self-Promotion
 
 Like this plugin? Star the repository on
 GitHub.
@@ -409,6 +412,6 @@ GitHub.
 Love this plugin? Follow [me](https://wsdjeg.net/) on
 [GitHub](https://github.com/wsdjeg).
 
-## Feedback
+## 💬 Feedback
 
 If you encounter any bugs or have suggestions, please file an issue in the [issue tracker](https://github.com/wsdjeg/nvim-plug/issues).

@@ -17,7 +17,7 @@ local log = require('plug.logger')
 local on_uidate
 
 --- @class PlugUiData
---- @field command? string clone/pull/build/curl
+--- @field command? string clone/pull/build/curl/luarocks
 --- @filed clone_process? string
 --- @filed clone_done? boolean
 --- @filed building? boolean
@@ -25,6 +25,7 @@ local on_uidate
 --- @field pull_done? boolean
 --- @field pull_process? string
 --- @field curl_done? boolean
+--- @field luarocks_done? boolean
 
 if config.ui == 'default' then
   on_uidate = require('plug.ui').on_update
@@ -34,15 +35,17 @@ end
 
 local processes = 0
 
-local installation_queue = {}
-local building_queue = {}
-local updating_queue = {}
-local raw_download_queue = {}
+local tasks = {}
+
+function H.run_first_task()
+  local task = table.remove(tasks, 1)
+  task[1](task[2], tasks[3])
+end
 
 --- @param plugSpec PluginSpec
 function H.build(plugSpec)
   if processes >= config.max_processes then
-    table.insert(building_queue, plugSpec)
+    table.insert(tasks, { H.build, plugSpec })
     return
   end
   on_uidate(plugSpec.name, { command = 'build' })
@@ -57,8 +60,8 @@ function H.build(plugSpec)
         on_uidate(plugSpec.name, { build_done = false })
       end
       processes = processes - 1
-      if #building_queue > 0 then
-        H.build(table.remove(building_queue))
+      if #tasks > 0 then
+        H.run_first_task()
       end
     end,
     cwd = plugSpec.path,
@@ -70,10 +73,41 @@ function H.build(plugSpec)
   end
 end
 
+function H.luarocks_install(plugSpec)
+  if processes >= config.max_processes then
+    table.insert(tasks, { H.luarocks_install, plugSpec })
+    return
+  end
+  local cmd = { 'luarocks', 'install', plugSpec.name }
+  on_uidate(plugSpec.name, {
+    command = 'luarocks',
+  })
+  local jobid = job.start(cmd, {
+    on_exit = function(id, data, single)
+      if data == 0 and single == 0 then
+        on_uidate(plugSpec.name, {
+          luarocks_done = true,
+        })
+      end
+      processes = processes - 1
+      if #tasks > 0 then
+        H.run_first_task()
+      end
+    end,
+  })
+  if jobid > 0 then
+    processes = processes + 1
+  else
+    on_uidate(plugSpec.name, {
+      luarocks_done = false,
+    })
+  end
+end
+
 --- @param plugSpec PluginSpec
 function H.download_raw(plugSpec, force)
   if processes >= config.max_processes then
-    table.insert(raw_download_queue, plugSpec)
+    tasks.insert(tasks, { H.download_raw, plugSpec })
     return
   elseif vim.fn.filereadable(plugSpec.path) == 1 and not force then
     on_uidate(plugSpec.name, { command = 'curl', curl_done = true })
@@ -90,10 +124,8 @@ function H.download_raw(plugSpec, force)
         on_uidate(plugSpec.name, { curl_done = false })
       end
       processes = processes - 1
-      if #installation_queue > 0 then
-        H.install_plugin(table.remove(installation_queue, 1))
-      elseif #building_queue > 0 then
-        H.build(table.remove(building_queue, 1))
+      if #tasks > 0 then
+        H.run_first_task()
       end
     end,
     env = {
@@ -107,7 +139,7 @@ end
 --- @param plugSpec PluginSpec
 function H.install_plugin(plugSpec)
   if processes >= config.max_processes then
-    table.insert(installation_queue, plugSpec)
+    table.insert(tasks, { H.install_plugin, plugSpec })
     return
   elseif vim.fn.isdirectory(plugSpec.path) == 1 then
     -- if the directory exists, skip installation
@@ -152,10 +184,8 @@ function H.install_plugin(plugSpec)
         on_uidate(plugSpec.name, { clone_done = false, download_process = 0 })
       end
       processes = processes - 1
-      if #installation_queue > 0 then
-        H.install_plugin(table.remove(installation_queue, 1))
-      elseif #building_queue > 0 then
-        H.build(table.remove(building_queue, 1))
+      if #tasks > 0 then
+        H.run_first_task()
       end
     end,
     env = {
@@ -170,7 +200,7 @@ end
 --- @param plugSpec PluginSpec
 function H.update_plugin(plugSpec, force)
   if processes >= config.max_processes then
-    table.insert(updating_queue, { plugSpec, force })
+    table.insert(tasks, { H.update_plugin, plugSpec, force })
     return
   elseif vim.fn.isdirectory(plugSpec.path) ~= 1 then
     -- if the directory does not exist, return failed
@@ -205,10 +235,8 @@ function H.update_plugin(plugSpec, force)
         on_uidate(plugSpec.name, { pull_done = false })
       end
       processes = processes - 1
-      if #updating_queue > 0 then
-        H.update_plugin(unpack(table.remove(updating_queue, 1)))
-      elseif #building_queue > 0 then
-        H.build(table.remove(building_queue, 1))
+      if #tasks > 0 then
+        H.run_first_task()
       end
     end,
     cwd = plugSpec.path,
@@ -230,6 +258,8 @@ M.install = function(plugSpecs)
       on_uidate(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v)
+    elseif v.type == 'rocks' then
+      H.luarocks_install(v)
     else
       H.install_plugin(v)
     end
@@ -242,6 +272,8 @@ M.update = function(plugSpecs, force)
       on_uidate(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v, force)
+    elseif v.type == 'rocks' then
+      require('plug.rocks').update(v)
     else
       H.update_plugin(v, force)
     end
