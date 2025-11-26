@@ -10,6 +10,7 @@ local M = {}
 local config = require('plug.config')
 local log = require('plug.logger')
 local clock = require('plug.clock')
+local util = require('plug.util')
 
 local add_raw_rtp = false
 
@@ -96,7 +97,7 @@ function M.parser(plugSpec)
     return plugSpec
   end
   if plugSpec.dev then
-    local dev_path = config.dev_path .. plugSpec[1]
+    local dev_path = util.unify_path(config.dev_path) .. plugSpec.name
     if vim.fn.isdirectory(dev_path) == 1 then
       plugSpec.dev_path = dev_path
     end

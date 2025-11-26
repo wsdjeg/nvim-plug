@@ -209,7 +209,7 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
 - `config` and `config_after` function will be not be called if the plugin has not been installed.
 - `priority` does not work for lazy plugins.
-- dev path works only when exists. nvim-plug will not clone repos into dev_path
+- if `dev` is true, and the develop directory exists, it will be added to runtimepath.
 - `keys` is not lazy mapping, use `on_map` instead.
 
 ## 💻 Commands
