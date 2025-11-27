@@ -36,9 +36,16 @@ end
 local processes = 0
 
 local tasks = {}
+local luarocks_tasks = {}
+local luarocks_running = false
 
 function H.run_first_task()
   local task = table.remove(tasks, 1)
+  task[1](task[2], tasks[3])
+end
+
+function H.run_first_luarocks_task()
+  local task = table.remove(luarocks_tasks, 1)
   task[1](task[2], tasks[3])
 end
 
@@ -73,9 +80,20 @@ function H.build(plugSpec)
   end
 end
 
+-- known issue:
+--
+-- luarocks does not support install multiple rocks
+--
+-- https://github.com/luarocks/luarocks/issues/1359
+--
+-- even can not be run with jobs when the previous luarocks process does not finished.
+--
+-- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim stderr >{ "", "Error: command 'install' requires exclusive write access to D:/Scoop/apps/luarocks/current/rocks - try --force-lock to overwrite the lock" }
+-- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim exit code 4 single 0
+
 function H.luarocks_install(plugSpec)
-  if processes >= config.max_processes then
-    table.insert(tasks, { H.luarocks_install, plugSpec })
+  if luarocks_running then
+    table.insert(luarocks_tasks, { H.luarocks_install, plugSpec })
     return
   end
   local cmd = { 'luarocks', 'install', plugSpec.name }
@@ -83,20 +101,33 @@ function H.luarocks_install(plugSpec)
     command = 'luarocks',
   })
   local jobid = job.start(cmd, {
+    on_stdout = function(id, date)
+      log.debug('luarocks install ' .. plugSpec.name .. ' stdout >' .. vim.inspect(date))
+    end,
+    on_stderr = function(id, date)
+      log.debug('luarocks install ' .. plugSpec.name .. ' stderr >' .. vim.inspect(date))
+    end,
     on_exit = function(id, data, single)
+      log.debug(
+        'luarocks install ' .. plugSpec.name .. ' exit code ' .. data .. ' single ' .. single
+      )
       if data == 0 and single == 0 then
         on_uidate(plugSpec.name, {
           luarocks_done = true,
         })
+      else
+        on_uidate(plugSpec.name, {
+          luarocks_done = false,
+        })
       end
-      processes = processes - 1
-      if #tasks > 0 then
-        H.run_first_task()
+      luarocks_running = false
+      if #luarocks_tasks > 0 then
+        H.run_first_luarocks_task()
       end
     end,
   })
   if jobid > 0 then
-    processes = processes + 1
+      luarocks_running = true
   else
     on_uidate(plugSpec.name, {
       luarocks_done = false,
