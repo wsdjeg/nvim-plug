@@ -25,30 +25,66 @@ function M.actions()
 end
 
 function M.default_action(entry)
-    require('terminal').open(entry.value.path)
-    vim.fn.timer_start(200, function()
-        vim.cmd('noautocmd startinsert')
-    end)
+    local p
+    if entry.value.dev and entry.value.dev_path then
+        p = entry.value.dev_path
+    elseif entry.value.type == 'rocks' then
+        if entry.value.rtp then
+            p = entry.value.rtp
+        end
+    else
+        p = entry.value.path
+    end
+    if p then
+        require('terminal').open(p)
+        vim.fn.timer_start(200, function()
+            vim.cmd('noautocmd startinsert')
+        end)
+    end
 end
 
 function M._open_url(entry)
-    vim.ui.open(entry.value.url)
+    if entry.value.url then
+        vim.ui.open(entry.value.url)
+    end
 end
 
 function M._tabnew_lcd(entry)
-    vim.cmd('tabnew')
-    vim.cmd('lcd ' .. entry.value.path)
+    if entry.value.dev and entry.value.dev_path then
+        vim.cmd('tabnew')
+        vim.cmd.lcd(entry.value.dev_path)
+    elseif entry.value.type == 'rocks' then
+        if entry.value.rtp then
+            vim.cmd('tabnew')
+            vim.cmd.lcd(entry.value.rtp)
+        else
+            vim.notify(entry.value.name .. ' is not installed!')
+        end
+    else
+        vim.cmd('tabnew')
+        vim.cmd.lcd(entry.value.path)
+    end
 end
 
 function M._copu_url(entry)
-    vim.fn.setreg('"', entry.value.url)
+    if entry.value.url then
+        vim.fn.setreg('"', entry.value.url)
+    end
 end
 
 M.preview_win = true
 
 ---@field item PickerItem
 function M.preview(item, win, buf)
-    previewer.preview(item.value.path .. '/README.md', win, buf)
+    if item.value.dev and item.value.dev_path then
+        previewer.preview(item.value.dev_path .. '/README.md', win, buf)
+    elseif item.value.type == 'rocks' then
+        if item.value.rtp then
+            previewer.preview(item.value.rtp .. '/README.md', win, buf)
+        end
+    else
+        previewer.preview(item.value.path .. '/README.md', win, buf)
+    end
 end
 
 return M
