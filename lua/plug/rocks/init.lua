@@ -71,6 +71,8 @@ function M.enable()
             .. luarocks_config.deploy_lib_dir
             .. '\\?.'
             .. luarocks_config.external_lib_extension
+        vim.env.LUA_PATH = package.path
+        vim.env.LUA_CPATH = package.cpath
     end)
     if ok then
         enabled = true
