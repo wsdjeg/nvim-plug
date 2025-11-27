@@ -14,4 +14,3 @@ for _, f in ipairs({ 'info', 'debug', 'warn', 'error' }) do
 end
 
 return M
-
