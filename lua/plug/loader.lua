@@ -68,7 +68,7 @@ end
 --- @param name string
 --- @return string
 local function get_default_module(name)
-    return name:lower()
+    return name
         :gsub('[%.%-]lua$', '')
         :gsub('^n?vim-', '')
         :gsub('[%.%-]n?vim', '')
@@ -179,10 +179,17 @@ function M.load(plugSpec)
         plugSpec.loaded = true
         if plugSpec.opts then
             if plugSpec.module then
+                log.info(plugSpec.module)
+                log.info(tostring(package.loaded.ChineseLinter))
                 local ok, module = pcall(require, plugSpec.module)
+                log.info(tostring(ok))
+                log.info(tostring(module))
+                log.info(tostring(package.loaded.ChineseLinter))
                 if ok then
                     if module.setup then
+                        log.info(tostring(package.loaded.ChineseLinter))
                         module.setup(plugSpec.opts)
+                        log.info(tostring(package.loaded.ChineseLinter))
                     else
                         log.info(
                             string.format(
