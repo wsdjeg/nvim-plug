@@ -68,8 +68,7 @@ end
 --- @param name string
 --- @return string
 local function get_default_module(name)
-    return name
-        :gsub('[%.%-]lua$', '')
+    return name:gsub('[%.%-]lua$', '')
         :gsub('^n?vim-', '')
         :gsub('[%.%-]n?vim', '')
 end
@@ -94,6 +93,13 @@ function M.parser(plugSpec)
     plugSpec.name = check_name(plugSpec)
     if not plugSpec.module then
         plugSpec.module = get_default_module(plugSpec.name)
+        log.info(
+            string.format(
+                'set %s default module name to %s',
+                plugSpec.name,
+                plugSpec.module
+            )
+        )
     end
     if #plugSpec.name == 0 then
         plugSpec.enabled = false
@@ -179,17 +185,10 @@ function M.load(plugSpec)
         plugSpec.loaded = true
         if plugSpec.opts then
             if plugSpec.module then
-                log.info(plugSpec.module)
-                log.info(tostring(package.loaded.ChineseLinter))
                 local ok, module = pcall(require, plugSpec.module)
-                log.info(tostring(ok))
-                log.info(tostring(module))
-                log.info(tostring(package.loaded.ChineseLinter))
                 if ok then
                     if module.setup then
-                        log.info(tostring(package.loaded.ChineseLinter))
                         module.setup(plugSpec.opts)
-                        log.info(tostring(package.loaded.ChineseLinter))
                     else
                         log.info(
                             string.format(
