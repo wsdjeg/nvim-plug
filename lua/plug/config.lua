@@ -18,21 +18,21 @@ M.import = 'plugins'
 M.enable_priority = false
 M.enable_luarocks = false
 function M.setup(opt)
-    M.bundle_dir = opt.bundle_dir or M.bundle_dir
-    M.max_processes = opt.max_processes or M.max_processes
-    M.base_url = opt.base_url or M.base_url
-    M.ui = opt.ui or M.ui
-    M.http_proxy = opt.http_proxy
-    M.https_proxy = opt.https_proxy
-    M.clone_depth = opt.clone_depth or M.clone_depth
-    M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
-    M.enable_priority = opt.enable_priority or M.enable_priority
-    M.import = opt.import or M.import
-    M.dev_path = opt.dev_path or M.dev_path
-    M.enable_luarocks = opt.enable_luarocks or M.enable_luarocks
-    if M.enable_luarocks then
-        require('plug.rocks').enable()
-    end
+  M.bundle_dir = opt.bundle_dir or M.bundle_dir
+  M.max_processes = opt.max_processes or M.max_processes
+  M.base_url = opt.base_url or M.base_url
+  M.ui = opt.ui or M.ui
+  M.http_proxy = opt.http_proxy
+  M.https_proxy = opt.https_proxy
+  M.clone_depth = opt.clone_depth or M.clone_depth
+  M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
+  M.enable_priority = opt.enable_priority or M.enable_priority
+  M.import = opt.import or M.import
+  M.dev_path = opt.dev_path or M.dev_path
+  M.enable_luarocks = opt.enable_luarocks or M.enable_luarocks
+  if M.enable_luarocks then
+    require('plug.rocks').enable()
+  end
 end
 
 return M
