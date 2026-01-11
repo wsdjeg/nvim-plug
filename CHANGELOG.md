@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.7.0](https://github.com/wsdjeg/nvim-plug/compare/v0.6.0...v0.7.0) (2026-01-11)
+
+
+### Features
+
+* add luarocks support ([4380019](https://github.com/wsdjeg/nvim-plug/commit/4380019d5da7e6bbeba486b5d343878e1feb597f))
+* use luarocks show for rocks preview ([8baa3a7](https://github.com/wsdjeg/nvim-plug/commit/8baa3a745998ef2b7ae058386d4db1ac8e3ae846))
+
+
+### Bug Fixes
+
+* add debug info about set module name ([a41b120](https://github.com/wsdjeg/nvim-plug/commit/a41b120cb98a87271db3eb68139543ac9ecfb91f))
+* change fileformat to unix ([91184b5](https://github.com/wsdjeg/nvim-plug/commit/91184b5b7e8fc246120b4c4754f5b0b1509165d9))
+* fix dev_path ([f1db89c](https://github.com/wsdjeg/nvim-plug/commit/f1db89c5e10dbcd11e2d96dc1fa281e03bcc43d5))
+* fix LUA_PATH and LUA_CPATH ([094928b](https://github.com/wsdjeg/nvim-plug/commit/094928b575895d1644fb268b82585cc721f6047c))
+* fix luarocks installer ([bf70775](https://github.com/wsdjeg/nvim-plug/commit/bf70775ff093f02b17e0b8a05a4eed49d6ab1a3f))
+* fix picker default_action ([25f0b87](https://github.com/wsdjeg/nvim-plug/commit/25f0b87b809c63bfd25269e938c448d07e2b7894))
+* format code ([484bf1e](https://github.com/wsdjeg/nvim-plug/commit/484bf1e2318e6ac7444b4d1ced01a1e2673f200c))
+* format lua code and handle lsp warnings ([edef4e4](https://github.com/wsdjeg/nvim-plug/commit/edef4e43bd0630a76315fdd69e9bfb49f8fb5a9e))
+* remove lower() function ([eaace1e](https://github.com/wsdjeg/nvim-plug/commit/eaace1e0429e1762038ecf66ad2f104f969c3764))
+
 ## [0.6.0](https://github.com/wsdjeg/nvim-plug/compare/v0.5.0...v0.6.0) (2025-11-22)
 
 
