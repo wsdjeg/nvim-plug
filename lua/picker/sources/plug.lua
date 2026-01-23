@@ -21,7 +21,7 @@ function M.actions()
     ['<C-t>'] = M.default_action,
     ['<C-b>'] = M._open_url,
     ['<Enter>'] = M._tabnew_lcd,
-    ['<C-y>'] = M._copu_url,
+    ['<C-y>'] = M._copy_url,
   }
 end
 
@@ -67,7 +67,7 @@ function M._tabnew_lcd(entry)
   end
 end
 
-function M._copu_url(entry)
+function M._copy_url(entry)
   if entry.value.url then
     vim.fn.setreg('"', entry.value.url)
   end
