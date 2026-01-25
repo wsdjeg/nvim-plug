@@ -54,6 +54,9 @@ function M._tabnew_lcd(entry)
   if entry.value.dev and entry.value.dev_path then
     vim.cmd('tabnew')
     vim.cmd.lcd(entry.value.dev_path)
+    if vim.fn.filereadable('README.md') then
+      vim.cmd.edit('README.md')
+    end
   elseif entry.value.type == 'rocks' then
     if entry.value.rtp then
       vim.cmd('tabnew')
