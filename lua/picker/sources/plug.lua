@@ -12,7 +12,28 @@ function M.get()
     table.insert(p, k)
   end
   return vim.tbl_map(function(t)
-    return { value = t, str = t.name }
+    if t.desc then
+      return {
+        value = t,
+        str = t.name .. ' - ' .. t.desc,
+        highlight = {
+          {
+
+            0,
+            #t.name,
+            'Normal',
+          },
+          {
+
+            #t.name,
+            #t.name + 3 + #t.desc,
+            'Comment',
+          },
+        },
+      }
+    else
+      return { value = t, str = t.name }
+    end
   end, p)
 end
 
