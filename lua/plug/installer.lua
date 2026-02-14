@@ -5,6 +5,7 @@
 -- License: GPLv3
 --=============================================================================
 
+---@class Plug.Installer
 local M = {}
 
 local H = {}
@@ -14,28 +15,29 @@ local config = require('plug.config')
 local loader = require('plug.loader')
 local log = require('plug.logger')
 
-local on_uidate
+local on_update
 
 --- @class PlugUiData
 --- @field command? string clone/pull/build/curl/luarocks
---- @filed clone_process? string
---- @filed clone_done? boolean
---- @filed building? boolean
---- @filed build_done? boolean
+--- @field clone_process? string
+--- @field clone_done? boolean
+--- @field building? boolean
+--- @field build_done? boolean
 --- @field pull_done? boolean
 --- @field pull_process? string
 --- @field curl_done? boolean
 --- @field luarocks_done? boolean
+--- @field is_local? boolean
 
 if config.ui == 'default' then
-  on_uidate = require('plug.ui').on_update
+  on_update = require('plug.ui').on_update
 elseif config.ui == 'notify' then
-  on_uidate = require('plug.ui.notify').on_uidate
+  on_update = require('plug.ui.notify').on_update
 end
 
 local processes = 0
 
-local tasks = {}
+local tasks = {} ---@type { [1]: fun(spec: PluginSpec), [2]: PluginSpec, [3]?: boolean }[]
 local luarocks_tasks = {}
 local luarocks_running = false
 
@@ -49,34 +51,34 @@ function H.run_first_luarocks_task()
   task[1](task[2], tasks[3])
 end
 
---- @param plugSpec PluginSpec
-function H.build(plugSpec)
+--- @param spec PluginSpec
+function H.build(spec)
   if processes >= config.max_processes then
-    table.insert(tasks, { H.build, plugSpec })
+    table.insert(tasks, { H.build, spec })
     return
   end
-  on_uidate(plugSpec.name, { command = 'build' })
-  local jobid = job.start(plugSpec.build, {
-    on_exit = function(id, data, single)
+  on_update(spec.name, { command = 'build' })
+  local jobid = job.start(spec.build, {
+    on_exit = function(_, data, single)
       if data == 0 and single == 0 then
-        on_uidate(plugSpec.name, { build_done = true })
-        if plugSpec.autoload then
-          loader.load(plugSpec)
+        on_update(spec.name, { build_done = true })
+        if spec.autoload then
+          loader.load(spec)
         end
       else
-        on_uidate(plugSpec.name, { build_done = false })
+        on_update(spec.name, { build_done = false })
       end
       processes = processes - 1
       if #tasks > 0 then
         H.run_first_task()
       end
     end,
-    cwd = plugSpec.path,
+    cwd = spec.path,
   })
   if jobid > 0 then
     processes = processes + 1
   else
-    on_uidate(plugSpec.name, { build_done = false })
+    on_update(spec.name, { build_done = false })
   end
 end
 
@@ -91,47 +93,41 @@ end
 -- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim stderr >{ "", "Error: command 'install' requires exclusive write access to D:/Scoop/apps/luarocks/current/rocks - try --force-lock to overwrite the lock" }
 -- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim exit code 4 single 0
 
-function H.luarocks_install(plugSpec)
+function H.luarocks_install(spec)
   if luarocks_running then
-    table.insert(luarocks_tasks, { H.luarocks_install, plugSpec })
+    table.insert(luarocks_tasks, { H.luarocks_install, spec })
     return
   end
-  local cmd = { 'luarocks', 'install', plugSpec.name }
-  on_uidate(plugSpec.name, {
+  local cmd = { 'luarocks', 'install', spec.name }
+  on_update(spec.name, {
     command = 'luarocks',
   })
   local jobid = job.start(cmd, {
-    on_stdout = function(id, date)
+    on_stdout = function(_, date)
       log.debug(
-        'luarocks install '
-          .. plugSpec.name
-          .. ' stdout >'
-          .. vim.inspect(date)
+        'luarocks install ' .. spec.name .. ' stdout >' .. vim.inspect(date)
       )
     end,
-    on_stderr = function(id, date)
+    on_stderr = function(_, date)
       log.debug(
-        'luarocks install '
-          .. plugSpec.name
-          .. ' stderr >'
-          .. vim.inspect(date)
+        'luarocks install ' .. spec.name .. ' stderr >' .. vim.inspect(date)
       )
     end,
-    on_exit = function(id, data, single)
+    on_exit = function(_, data, single)
       log.debug(
         'luarocks install '
-          .. plugSpec.name
+          .. spec.name
           .. ' exit code '
           .. data
           .. ' single '
           .. single
       )
       if data == 0 and single == 0 then
-        on_uidate(plugSpec.name, {
+        on_update(spec.name, {
           luarocks_done = true,
         })
       else
-        on_uidate(plugSpec.name, {
+        on_update(spec.name, {
           luarocks_done = false,
         })
       end
@@ -144,31 +140,29 @@ function H.luarocks_install(plugSpec)
   if jobid > 0 then
     luarocks_running = true
   else
-    on_uidate(plugSpec.name, {
+    on_update(spec.name, {
       luarocks_done = false,
     })
   end
 end
 
---- @param plugSpec PluginSpec
-function H.download_raw(plugSpec, force)
+--- @param spec PluginSpec
+--- @param force? boolean
+function H.download_raw(spec, force)
   if processes >= config.max_processes then
-    tasks.insert(tasks, { H.download_raw, plugSpec })
+    table.insert(tasks, { H.download_raw, spec })
     return
-  elseif vim.fn.filereadable(plugSpec.path) == 1 and not force then
-    on_uidate(plugSpec.name, { command = 'curl', curl_done = true })
+  elseif vim.fn.filereadable(spec.path) == 1 and not force then
+    on_update(spec.name, { command = 'curl', curl_done = true })
     return
   end
 
-  local cmd = { 'curl', '-fLo', plugSpec.path, '--create-dirs', plugSpec.url }
-  on_uidate(plugSpec.name, { command = 'curl' })
+  local cmd = { 'curl', '-fLo', spec.path, '--create-dirs', spec.url }
+  on_update(spec.name, { command = 'curl' })
   local jobid = job.start(cmd, {
-    on_exit = function(id, data, single)
-      if data == 0 and single == 0 then
-        on_uidate(plugSpec.name, { curl_done = true })
-      else
-        on_uidate(plugSpec.name, { curl_done = false })
-      end
+    on_exit = function(_, data, single)
+      on_update(spec.name, { curl_done = data == 0 and single == 0 })
+
       processes = processes - 1
       if #tasks > 0 then
         H.run_first_task()
@@ -182,14 +176,15 @@ function H.download_raw(plugSpec, force)
   processes = processes + 1
 end
 
---- @param plugSpec PluginSpec
-function H.install_plugin(plugSpec)
+--- @param spec PluginSpec
+function H.install_plugin(spec)
   if processes >= config.max_processes then
-    table.insert(tasks, { H.install_plugin, plugSpec })
+    table.insert(tasks, { H.install_plugin, spec })
     return
-  elseif vim.fn.isdirectory(plugSpec.path) == 1 then
+  end
+  if vim.fn.isdirectory(spec.path) == 1 then
     -- if the directory exists, skip installation
-    on_uidate(plugSpec.name, { command = 'clone', clone_done = true })
+    on_update(spec.name, { command = 'clone', clone_done = true })
     return
   end
   local cmd = { 'git', 'clone', '--progress' }
@@ -197,40 +192,37 @@ function H.install_plugin(plugSpec)
     table.insert(cmd, '--depth')
     table.insert(cmd, tostring(config.clone_depth))
   end
-  if plugSpec.branch then
+  if spec.branch then
     table.insert(cmd, '--branch')
-    table.insert(cmd, plugSpec.branch)
-  elseif plugSpec.tag then
+    table.insert(cmd, spec.branch)
+  elseif spec.tag then
     table.insert(cmd, '--branch')
-    table.insert(cmd, plugSpec.tag)
+    table.insert(cmd, spec.tag)
   end
 
-  table.insert(cmd, plugSpec.url)
-  table.insert(cmd, plugSpec.path)
-  on_uidate(plugSpec.name, { command = 'clone', clone_process = '' })
-  log.info('downloading ' .. plugSpec.name .. ':' .. vim.inspect(cmd))
+  table.insert(cmd, spec.url)
+  table.insert(cmd, spec.path)
+  on_update(spec.name, { command = 'clone', clone_process = '' })
+  log.info('downloading ' .. spec.name .. ':' .. vim.inspect(cmd))
   local jobid = job.start(cmd, {
-    on_stderr = function(id, data)
+    on_stderr = function(_, data)
       for _, v in ipairs(data) do
         local status = vim.fn.matchstr(v, [[\d\+%\s(\d\+/\d\+)]])
         if vim.fn.empty(status) == 0 then
-          on_uidate(plugSpec.name, { clone_process = status })
+          on_update(spec.name, { clone_process = status })
         end
       end
     end,
-    on_exit = function(id, data, single)
+    on_exit = function(_, data, single)
       if data == 0 and single == 0 then
-        on_uidate(
-          plugSpec.name,
-          { clone_done = true, download_process = 100 }
-        )
-        if plugSpec.build then
-          H.build(plugSpec)
-        elseif plugSpec.autoload then
-          loader.load(plugSpec)
+        on_update(spec.name, { clone_done = true, download_process = 100 })
+        if spec.build then
+          H.build(spec)
+        elseif spec.autoload then
+          loader.load(spec)
         end
       else
-        on_uidate(plugSpec.name, { clone_done = false, download_process = 0 })
+        on_update(spec.name, { clone_done = false, download_process = 0 })
       end
       processes = processes - 1
       if #tasks > 0 then
@@ -246,49 +238,49 @@ function H.install_plugin(plugSpec)
   processes = processes + 1
 end
 
---- @param plugSpec PluginSpec
-function H.update_plugin(plugSpec, force)
+--- @param spec PluginSpec
+--- @param force? boolean
+function H.update_plugin(spec, force)
   if processes >= config.max_processes then
-    table.insert(tasks, { H.update_plugin, plugSpec, force })
+    table.insert(tasks, { H.update_plugin, spec, force })
     return
-  elseif vim.fn.isdirectory(plugSpec.path) ~= 1 then
+  end
+  if vim.fn.isdirectory(spec.path) ~= 1 then
     -- if the directory does not exist, return failed
-    on_uidate(plugSpec.name, { command = 'pull', pull_done = false })
+    on_update(spec.name, { command = 'pull', pull_done = false })
     return
-  elseif vim.fn.isdirectory(plugSpec.path .. '/.git') ~= 1 then
+  end
+  if vim.fn.isdirectory(spec.path .. '/.git') ~= 1 then
     -- if the directory is not git repo
-    on_uidate(plugSpec.name, { command = 'pull', pull_done = false })
+    on_update(spec.name, { command = 'pull', pull_done = false })
     return
-  elseif plugSpec.frozen and not force then
-    on_uidate(plugSpec.name, { command = 'pull', pull_done = true })
+  end
+  if spec.frozen and not force then
+    on_update(spec.name, { command = 'pull', pull_done = true })
     return
   end
   local cmd = { 'git', 'pull', '--progress' }
-  on_uidate(plugSpec.name, { command = 'pull', pull_process = '' })
+  on_update(spec.name, { command = 'pull', pull_process = '' })
   local jobid = job.start(cmd, {
-    on_stderr = function(id, data)
+    on_stderr = function(_, data)
       for _, v in ipairs(data) do
         local status = vim.fn.matchstr(v, [[\d\+%\s(\d\+/\d\+)]])
         if vim.fn.empty(status) == 0 then
-          on_uidate(plugSpec.name, { pull_process = status })
+          on_update(spec.name, { pull_process = status })
         end
       end
     end,
-    on_exit = function(id, data, single)
-      if data == 0 and single == 0 then
-        on_uidate(plugSpec.name, { pull_done = true })
-        if plugSpec.build then
-          H.build(plugSpec)
-        end
-      else
-        on_uidate(plugSpec.name, { pull_done = false })
+    on_exit = function(_, data, single)
+      on_update(spec.name, { pull_done = data == 0 and single == 0 })
+      if data == 0 and single == 0 and spec.build then
+        H.build(spec)
       end
       processes = processes - 1
       if #tasks > 0 then
         H.run_first_task()
       end
     end,
-    cwd = plugSpec.path,
+    cwd = spec.path,
     env = {
       http_proxy = config.http_proxy,
       https_proxy = config.https_proxy,
@@ -297,14 +289,15 @@ function H.update_plugin(plugSpec, force)
   if jobid > 0 then
     processes = processes + 1
   else
-    on_uidate(plugSpec.name, { pull_done = false })
+    on_update(spec.name, { pull_done = false })
   end
 end
 
-M.install = function(plugSpecs)
-  for _, v in ipairs(plugSpecs) do
+---@param specs PluginSpec[]
+function M.install(specs)
+  for _, v in ipairs(specs) do
     if v.is_local then
-      on_uidate(v.name, { is_local = true })
+      on_update(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v)
     elseif v.type == 'rocks' then
@@ -315,10 +308,12 @@ M.install = function(plugSpecs)
   end
 end
 
-M.update = function(plugSpecs, force)
-  for _, v in ipairs(plugSpecs) do
+--- @param specs PluginSpec[]
+--- @param force? boolean
+function M.update(specs, force)
+  for _, v in ipairs(specs) do
     if v.is_local then
-      on_uidate(v.name, { is_local = true })
+      on_update(v.name, { is_local = true })
     elseif v.type == 'raw' then
       H.download_raw(v, force)
     elseif v.type == 'rocks' then

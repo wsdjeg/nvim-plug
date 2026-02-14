@@ -1,43 +1,44 @@
+---@class Plug.Hooks
 local M = {}
 
 local group = vim.api.nvim_create_augroup('plugin_hooks', { clear = true })
 
 local plugin_loader = require('plug.loader')
 
-local event_plugins = {}
-local cmd_plugins = {}
-local on_ft_plugins = {}
-local on_fn_plugins = {}
+local event_plugins = {} ---@type table<string, integer>
+local cmd_plugins = {} ---@type table<string, PluginSpec>
+local on_ft_plugins = {} ---@type table<string, integer>
+local on_fn_plugins = {} ---@type table<string, integer>
 
---- @param events string | table<string>
---- @param plugSpec PluginSpec
-function M.on_events(events, plugSpec)
+--- @param events string[] | string
+--- @param spec PluginSpec
+function M.on_events(events, spec)
   if type(events) == 'string' then
     events = { events }
   end
-  event_plugins[plugSpec.name] = vim.api.nvim_create_autocmd(events, {
+  event_plugins[spec.name] = vim.api.nvim_create_autocmd(events, {
     group = group,
     pattern = { '*' },
-    callback = function(_)
-      vim.api.nvim_del_autocmd(event_plugins[plugSpec.name])
-      if on_ft_plugins[plugSpec.name] then
-        vim.api.nvim_del_autocmd(on_ft_plugins[plugSpec.name])
+    callback = function()
+      vim.api.nvim_del_autocmd(event_plugins[spec.name])
+      if on_ft_plugins[spec.name] then
+        vim.api.nvim_del_autocmd(on_ft_plugins[spec.name])
       end
-      plugin_loader.load(plugSpec)
+      plugin_loader.load(spec)
     end,
   })
 end
 
---- @param cmds string | table<string>
---- @param plugSpec PluginSpec
-function M.on_cmds(cmds, plugSpec)
+--- @param cmds string[] | string
+--- @param spec PluginSpec
+function M.on_cmds(cmds, spec)
   if type(cmds) == 'string' then
     cmds = { cmds }
   end
   for _, cmd in ipairs(cmds) do
-    cmd_plugins[cmd] = plugSpec
+    cmd_plugins[cmd] = spec
     vim.api.nvim_create_user_command(cmd, function(opt)
-      for _, demmy_command in ipairs(plugSpec.cmds) do
+      for _, demmy_command in ipairs(spec.cmds) do
         vim.api.nvim_del_user_command(demmy_command)
       end
       plugin_loader.load(cmd_plugins[opt.name])
@@ -60,7 +61,7 @@ function M.on_cmds(cmds, plugSpec)
       vim.cmd(excmd .. ' ' .. opt.args)
     end, {
       nargs = '*',
-      complete = function(_)
+      complete = function()
         return {}
       end,
       bang = true,
@@ -69,33 +70,37 @@ function M.on_cmds(cmds, plugSpec)
   end
 end
 
-function M.on_ft(fts, plugSpec)
+---@param fts string[] | string
+---@param spec PluginSpec
+function M.on_ft(fts, spec)
   if type(fts) == 'string' then
     fts = { fts }
   end
-  on_ft_plugins[plugSpec.name] = vim.api.nvim_create_autocmd({ 'FileType' }, {
+  on_ft_plugins[spec.name] = vim.api.nvim_create_autocmd({ 'FileType' }, {
     group = group,
     pattern = fts,
-    callback = function(_)
-      vim.api.nvim_del_autocmd(on_ft_plugins[plugSpec.name])
-      if event_plugins[plugSpec.name] then
-        vim.api.nvim_del_autocmd(event_plugins[plugSpec.name])
+    callback = function()
+      vim.api.nvim_del_autocmd(on_ft_plugins[spec.name])
+      if event_plugins[spec.name] then
+        vim.api.nvim_del_autocmd(event_plugins[spec.name])
       end
-      plugin_loader.load(plugSpec)
+      plugin_loader.load(spec)
     end,
   })
 end
 
-function M.on_map(maps, plugSpec)
+---@param maps string[] | string
+---@param spec PluginSpec
+function M.on_map(maps, spec)
   if type(maps) == 'string' then
     maps = { maps }
   end
   for _, lhs in ipairs(maps) do
     vim.keymap.set('n', lhs, function()
-      for _, v in ipairs(plugSpec.on_map) do
+      for _, v in ipairs(spec.on_map) do
         vim.keymap.del('n', v, {})
       end
-      plugin_loader.load(plugSpec)
+      plugin_loader.load(spec)
 
       local termstr = '<M-_>'
       local input = ''
@@ -104,16 +109,15 @@ function M.on_map(maps, plugSpec)
 
       while true do
         local char = vim.fn.getchar()
-        if type(char) == 'number' then
-          input = input .. vim.fn.nr2char(char)
-        else
-          input = input .. char
-        end
+        input = input
+          .. (type(char) == 'number' and vim.fn.nr2char(char) or char)
+
         local idx = vim.fn.stridx(input, termstr)
         if idx >= 1 then
           input = string.sub(input, 1, idx)
           break
-        elseif idx == 0 then
+        end
+        if idx == 0 then
           input = ''
           break
         end
@@ -123,27 +127,26 @@ function M.on_map(maps, plugSpec)
         vim.api.nvim_replace_termcodes(lhs .. input, false, true, true),
         'm'
       )
-    end, { silent = true, desc = plugSpec.name .. ' on_map hooks' })
+    end, { silent = true, desc = spec.name .. ' on_map hooks' })
   end
 end
 
-function M.on_func(fn, plugSpec)
-  local fns
-  if type(fn) == 'table' then
-    fns = fn
-  elseif type(fn) == 'string' then
-    fns = { fn }
+---@param fn string[] | string
+---@param spec PluginSpec
+function M.on_func(fn, spec)
+  if type(fn) == 'string' then
+    fn = { fn }
   end
-  on_fn_plugins[plugSpec.name] = vim.api.nvim_create_autocmd(
+  on_fn_plugins[spec.name] = vim.api.nvim_create_autocmd(
     { 'FuncUndefined' },
     {
       group = group,
-      pattern = fns,
-      callback = function(_)
-        if on_fn_plugins[plugSpec.name] then
-          vim.api.nvim_del_autocmd(on_fn_plugins[plugSpec.name])
+      pattern = fn,
+      callback = function()
+        if on_fn_plugins[spec.name] then
+          vim.api.nvim_del_autocmd(on_fn_plugins[spec.name])
         end
-        plugin_loader.load(plugSpec)
+        plugin_loader.load(spec)
       end,
     }
   )

@@ -5,8 +5,10 @@
 -- License: GPLv3
 --=============================================================================
 
+---@param a string
+---@return string[]
 local function complete(a)
-  local plug_name = {}
+  local plug_name = {} ---@type string[]
   for k, _ in pairs(require('plug').get()) do
     if a and vim.startswith(k, a) then
       table.insert(plug_name, k)
@@ -16,22 +18,20 @@ local function complete(a)
 end
 
 vim.api.nvim_create_user_command('PlugInstall', function(opt)
-  local plugs = {}
+  local plugs = {} ---@type PluginSpec[]
   local all_plugins = require('plug').get()
-  if #opt.fargs == 0 then
+  if vim.tbl_isempty(opt.fargs) then
     for _, v in pairs(all_plugins) do
       table.insert(plugs, v)
     end
-    require('plug.installer').install(plugs)
   else
     for _, v in ipairs(opt.fargs) do
-      local p = all_plugins[v]
-      if p then
-        table.insert(plugs, p)
+      if all_plugins[v] then
+        table.insert(plugs, all_plugins[v])
       end
     end
-    require('plug.installer').install(plugs)
   end
+  require('plug.installer').install(plugs)
   local c = require('plug.config')
   if c.ui == 'default' then
     require('plug.ui').open()
@@ -42,22 +42,22 @@ end, {
 })
 
 vim.api.nvim_create_user_command('PlugUpdate', function(opt)
-  local plugs = {}
+  local plugs = {} ---@type PluginSpec[]
+  local force = false
   local all_plugins = require('plug').get()
-  if #opt.fargs == 0 then
+  if vim.tbl_isempty(opt.fargs) then
     for _, v in pairs(all_plugins) do
       table.insert(plugs, v)
     end
-    require('plug.installer').update(plugs, false)
   else
+    force = true
     for _, v in ipairs(opt.fargs) do
-      local p = all_plugins[v]
-      if p then
-        table.insert(plugs, p)
+      if all_plugins[v] then
+        table.insert(plugs, all_plugins[v])
       end
     end
-    require('plug.installer').update(plugs, true)
   end
+  require('plug.installer').update(plugs, force)
   local c = require('plug.config')
   if c.ui == 'default' then
     require('plug.ui').open()
@@ -71,7 +71,5 @@ vim.api.nvim_create_user_command('Plug', function(opt)
   require('plug.command').run(opt)
 end, {
   nargs = '*',
-  complete = function(a, b, c)
-    return require('plug.command').complete(a, b, c)
-  end,
+  complete = require('plug.command').complete,
 })
