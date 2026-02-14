@@ -5,6 +5,7 @@
 -- License: GPLv3
 --=============================================================================
 
+---@class Plug.Loader
 local M = {}
 
 local config = require('plug.config')
@@ -12,19 +13,20 @@ local log = require('plug.logger')
 local clock = require('plug.clock')
 local util = require('plug.util')
 
-local add_raw_rtp = false
+local add_raw_rtp = false ---@type boolean
 
 --- @class PluginSpec
 --- @field [1] string repo
 --- @field rtp? string default rtp path
---- @field events? table<string> lazy events to load this plugin
---- @field cmds? table<string> lazy cmds to load this plugins
+--- @field depends? PluginSpec[] plugin dependencies
+--- @field events? string[] lazy events to load this plugin
+--- @field cmds? string[] lazy cmds to load this plugins
 --- @field name? string plugin name
 --- @field branch? string branch name
 --- @field tag? string tag name
 --- @field url? string upstream url
 --- @field path? string download path
---- @field build? string|table<string> build commands
+--- @field build? string[]|string build commands
 --- @field is_local? boolean true for local plugin
 --- @field when boolean|string|function
 --- @field frozen? boolean if set to true, :PlugUpdate will not update this plugin without bang
@@ -39,182 +41,184 @@ local add_raw_rtp = false
 --- @field autoload? boolean
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
 --- @field loaded? boolean
---- @field enabled? boolean
+--- @field enabled? boolean|fun(): boolean
 --- @field dev? boolean # if set to true, dev_path will be used if it is existed.
 --- @field dev_path? string development directory of the plugin
 --- @field load_time? integer loading time in ms
 --- @field module? string lua main module name
+--- @field on_ft? string[]|string filetypes lazy loading
+--- @field on_map? string[]|string key bindings lazy loading
+--- @field on_func? string[]|string vim function lazy loading
 
---- @param plugSpec PluginSpec
---- @return boolean
-local function is_local_plugin(plugSpec)
-  if plugSpec.is_local or vim.fn.isdirectory(plugSpec[1]) == 1 then
-    plugSpec.is_local = true
+--- @param spec PluginSpec
+--- @return boolean is_local
+local function is_local_plugin(spec)
+  if spec.is_local or vim.fn.isdirectory(spec[1]) == 1 then
+    spec.is_local = true
     return true
-  else
-    return false
   end
+  return false
 end
---- @param plugSpec PluginSpec
---- @return string
-local function check_name(plugSpec)
-  if not plugSpec[1] and not plugSpec.url then
+--- @param spec PluginSpec
+--- @return string plugin_name
+local function check_name(spec)
+  if not spec[1] and not spec.url then
     return ''
   end
-  local s = vim.split(plugSpec[1] or plugSpec.url, '/')
+  local s = vim.split(spec[1] or spec.url, '/')
   return s[#s]
 end
 
 --- @param name string
---- @return string
+--- @return string module
 local function get_default_module(name)
-  return name
-    :gsub('[%.%-]lua$', '')
-    :gsub('^n?vim-', '')
-    :gsub('[%.%-]n?vim', '')
+  local module =
+    name:gsub('[%.%-]lua$', ''):gsub('^n?vim-', ''):gsub('[%.%-]n?vim', '')
+
+  return module
 end
 
---- @param plugSpec PluginSpec
-function M.parser(plugSpec)
-  if type(plugSpec.enabled) == 'nil' then
-    plugSpec.enabled = true
-  elseif type(plugSpec.enabled) == 'function' then
-    plugSpec.enabled = plugSpec.enabled()
+--- @param spec PluginSpec
+function M.parser(spec)
+  if spec.enabled == nil then
+    spec.enabled = true
+  elseif
+    type(spec.enabled) == 'function' and vim.is_callable(spec.enabled)
+  then
+    spec.enabled = spec.enabled()
     -- make sure enabled() return boolean
-    if type(plugSpec.enabled) ~= 'boolean' then
-      plugSpec.enabled = false
+    if type(spec.enabled) ~= 'boolean' then
+      spec.enabled = false
     end
-    if not plugSpec.enabled then
-      return plugSpec
+    if not spec.enabled then
+      return spec
     end
-  elseif type(plugSpec.enabled) ~= 'boolean' or plugSpec.enabled == false then
-    plugSpec.enabled = false
-    return plugSpec
+  elseif type(spec.enabled) ~= 'boolean' or spec.enabled == false then
+    spec.enabled = false
+    return spec
   end
-  plugSpec.name = check_name(plugSpec)
-  if not plugSpec.module then
-    plugSpec.module = get_default_module(plugSpec.name)
+  spec.name = check_name(spec)
+  if not spec.module then
+    spec.module = get_default_module(spec.name)
     log.info(
       string.format(
         'set %s default module name to %s',
-        plugSpec.name,
-        plugSpec.module
+        spec.name,
+        spec.module
       )
     )
   end
-  if #plugSpec.name == 0 then
-    plugSpec.enabled = false
-    return plugSpec
+  if spec.name:len() == 0 then
+    spec.enabled = false
+    return spec
   end
-  if plugSpec.dev then
-    local dev_path = util.unify_path(config.dev_path) .. plugSpec.name
+  if spec.dev then
+    local dev_path = util.unify_path(config.dev_path) .. spec.name
     if vim.fn.isdirectory(dev_path) == 1 then
-      plugSpec.dev_path = dev_path
+      spec.dev_path = dev_path
     end
   end
-  if is_local_plugin(plugSpec) then
-    plugSpec.rtp = plugSpec[1]
-    plugSpec.path = plugSpec[1]
-    plugSpec.url = nil
-  elseif plugSpec.type == 'raw' then
-    if not plugSpec.script_type or plugSpec.script_type == 'none' then
-      plugSpec.enabled = false
-      return plugSpec
-    else
-      plugSpec.path = config.raw_plugin_dir
-        .. '/'
-        .. plugSpec.script_type
-        .. '/'
-        .. plugSpec.name
-      if not add_raw_rtp then
-        vim.opt.runtimepath:prepend(config.raw_plugin_dir)
-        vim.opt.runtimepath:append(config.raw_plugin_dir .. '/after')
-        add_raw_rtp = true
-      end
+  if is_local_plugin(spec) then
+    spec.rtp = spec[1]
+    spec.path = spec[1]
+    spec.url = nil
+  elseif spec.type == 'raw' then
+    if not spec.script_type or spec.script_type == 'none' then
+      spec.enabled = false
+      return spec
     end
-  elseif plugSpec.type == 'rocks' then
-  elseif not plugSpec.script_type or plugSpec.script_type == 'none' then
-    plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
-    plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1]
-    plugSpec.url = config.base_url .. '/' .. plugSpec[1]
-  elseif plugSpec.script_type == 'color' then
-    plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
-    plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1] .. '/color'
-    plugSpec.url = config.base_url .. '/' .. plugSpec[1]
-  elseif plugSpec.script_type == 'plugin' then
-    plugSpec.rtp = config.bundle_dir .. '/' .. plugSpec[1]
-    plugSpec.path = config.bundle_dir .. '/' .. plugSpec[1] .. '/plugin'
-    plugSpec.url = config.base_url .. '/' .. plugSpec[1]
+    spec.path = config.raw_plugin_dir
+      .. '/'
+      .. spec.script_type
+      .. '/'
+      .. spec.name
+    if not add_raw_rtp then
+      local rtp_list = vim.split(vim.o.rtp, ',')
+      table.insert(rtp_list, 1, config.raw_plugin_dir) -- PREPEND
+      table.insert(rtp_list, config.raw_plugin_dir .. '/after') -- APPEND
+      vim.o.rtp = table.concat(rtp_list, ',')
+      add_raw_rtp = true
+    end
+  elseif spec.type == 'rocks' then -- NOTE: (DrKJeff16) ????
+  elseif not spec.script_type or spec.script_type == 'none' then
+    spec.rtp = config.bundle_dir .. '/' .. spec[1]
+    spec.path = config.bundle_dir .. '/' .. spec[1]
+    spec.url = config.base_url .. '/' .. spec[1]
+  elseif spec.script_type == 'color' then
+    spec.rtp = config.bundle_dir .. '/' .. spec[1]
+    spec.path = config.bundle_dir .. '/' .. spec[1] .. '/color'
+    spec.url = config.base_url .. '/' .. spec[1]
+  elseif spec.script_type == 'plugin' then
+    spec.rtp = config.bundle_dir .. '/' .. spec[1]
+    spec.path = config.bundle_dir .. '/' .. spec[1] .. '/plugin'
+    spec.url = config.base_url .. '/' .. spec[1]
   end
-  if
-    type(plugSpec.autoload) == 'nil'
-    and plugSpec.type ~= 'raw'
-    and not plugSpec.fetch
-  then
-    plugSpec.autoload = true
+  if spec.autoload == nil and spec.type ~= 'raw' and not spec.fetch then
+    spec.autoload = true
   end
 
-  if type(plugSpec.config_before) == 'function' then
-    plugSpec.config_before()
+  if type(spec.config_before) == 'function' and vim.is_callable(spec.config_before) then
+    spec.config_before()
   end
 
-  return plugSpec
+  return spec
 end
 
---- @param plugSpec PluginSpec
-function M.load(plugSpec)
-  if plugSpec.type == 'rocks' and not plugSpec.rtp then
-    require('plug.rocks').set_rtp(plugSpec)
+--- @param spec PluginSpec
+function M.load(spec)
+  if spec.type and spec.type == 'rocks' and not spec.rtp then
+    require('plug.rocks').set_rtp(spec)
   end
   if
-    plugSpec.rtp
-    and vim.fn.isdirectory(plugSpec.rtp) == 1
-    and not plugSpec.loaded
-    and not plugSpec.fetch
+    spec.rtp
+    and vim.fn.isdirectory(spec.rtp) == 1
+    and not spec.loaded
+    and not spec.fetch
   then
     clock.start()
-    local rtp
-    if plugSpec.dev and plugSpec.dev_path then
-      rtp = plugSpec.dev_path
-    else
-      rtp = plugSpec.rtp
+    local rtp = spec.rtp
+    if spec.dev and spec.dev_path then
+      rtp = spec.dev_path
     end
-    vim.opt.runtimepath:prepend(rtp)
+    local rtp_list = vim.split(vim.o.rtp, ',')
+    table.insert(rtp_list, 1, rtp)
     if vim.fn.isdirectory(rtp .. '/after') == 1 then
-      vim.opt.runtimepath:append(rtp .. '/after')
+      table.insert(rtp_list, rtp .. '/after')
     end
-    plugSpec.loaded = true
-    if plugSpec.opts then
-      if plugSpec.module then
-        local ok, module = pcall(require, plugSpec.module)
+    vim.o.runtimepath = table.concat(rtp_list, ',')
+
+    spec.loaded = true
+    if spec.opts then
+      if spec.module then
+        local ok, module = pcall(require, spec.module)
         if ok then
           if module.setup then
-            module.setup(plugSpec.opts)
+            module.setup(spec.opts)
           else
             log.info(
-              string.format('%s does not provide setup func', plugSpec.name)
+              string.format('%s does not provide setup func', spec.name)
             )
           end
         else
           log.info(
             string.format(
               'failed to require %s module for %s',
-              plugSpec.module,
-              plugSpec.name
+              spec.module,
+              spec.name
             )
           )
         end
       else
-        log.info('failed to set default module name for ' .. plugSpec.name)
+        log.info('failed to set default module name for ' .. spec.name)
       end
     end
-    if type(plugSpec.config) == 'function' then
-      plugSpec.config()
+    if type(spec.config) == 'function' and vim.is_callable(spec.config) then
+      spec.config()
     end
-    -- if on_map contains key in plugSpec.keys, it will be cleared by nvim-plug on_map hook.
+    -- if on_map contains key in spec.keys, it will be cleared by nvim-plug on_map hook.
     -- so we need to reset them.
-    if plugSpec.keys then
-      for _, key in ipairs(plugSpec.keys) do
+    if spec.keys then
+      for _, key in ipairs(spec.keys) do
         pcall(function()
           vim.keymap.set(unpack(key))
         end)
@@ -226,17 +230,13 @@ function M.load(plugSpec)
       for _, f in ipairs(plugin_directory_files) do
         vim.cmd.source(f)
       end
-      if type(plugSpec.config_after) == 'function' then
-        plugSpec.config_after()
+      if type(spec.config_after) == 'function' and vim.is_callable(spec.config_after) then
+        spec.config_after()
       end
     end
-    plugSpec.load_time = clock.time()
+    spec.load_time = clock.time()
     log.info(
-      string.format(
-        'load plug: %s in %sms',
-        plugSpec.name,
-        plugSpec.load_time
-      )
+      string.format('load plug: %s in %sms', spec.name, spec.load_time)
     )
   end
 end

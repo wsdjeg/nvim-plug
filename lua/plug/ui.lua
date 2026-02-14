@@ -5,25 +5,30 @@
 -- License: GPLv3
 --=============================================================================
 
+---@class Plug.Ui
 local M = {}
 
-local bufnr = -1
-local winid = -1
-local done = 0
-local total = -1
-local weight = 100
-local plugin_status = {}
+local bufnr = -1 ---@type integer
+local winid = -1 ---@type integer
+local done = 0 ---@type integer
+local total = -1 ---@type integer
+local weight = 100 ---@type integer
+local plugin_status = {} ---@type table<string, PlugUiData>
 
-local function count_done(p)
+---@param data table<string, PlugUiData>
+---@return integer done
+local function count_done(data)
   done = 0
-  for _, v in pairs(p) do
+  for _, v in pairs(data) do
     if v.command and v[v.command .. '_done'] or v.is_local then
       done = done + 1
     end
   end
   return done
 end
-local base = function()
+
+---@return string[] base
+local function base()
   total = #vim.tbl_keys(plugin_status)
   done = count_done(plugin_status)
   weight = vim.api.nvim_win_get_width(winid) - 10
@@ -38,6 +43,7 @@ local base = function()
   }
 end
 
+---@return string[] context
 local function build_context()
   local b = base()
 
@@ -102,7 +108,7 @@ local function build_context()
   return b
 end
 
-M.open = function()
+function M.open()
   if not vim.api.nvim_buf_is_valid(bufnr) then
     bufnr = vim.api.nvim_create_buf(false, true)
   end
@@ -118,19 +124,19 @@ M.open = function()
   end
   --- setup highlight
   if vim.fn.hlexists('PlugTitle') == 0 then
-    vim.cmd('hi def link PlugTitle TODO')
+    vim.api.nvim_set_hl(0, 'PlugTitle', { link = 'TODO', default = true })
   end
   if vim.fn.hlexists('PlugProcess') == 0 then
-    vim.cmd('hi def link PlugProcess Repeat')
+    vim.api.nvim_set_hl(0, 'PlugProcess', { link = 'Repeat', default = true })
   end
   if vim.fn.hlexists('PlugDone') == 0 then
-    vim.cmd('hi def link PlugDone Type')
+    vim.api.nvim_set_hl(0, 'PlugDone', { link = 'Type', default = true })
   end
   if vim.fn.hlexists('PlugFailed') == 0 then
-    vim.cmd('hi def link PlugFailed WarningMsg')
+    vim.api.nvim_set_hl(0, 'PlugFailed', { link = 'WarningMsg', default = true })
   end
   if vim.fn.hlexists('PlugDoing') == 0 then
-    vim.cmd('hi def link PlugDoing Number')
+    vim.api.nvim_set_hl(0, 'PlugDoing', { link = 'Number', default = true })
   end
   vim.fn.matchadd('PlugTitle', '^Plugins.*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugProcess', '^\\[\\zs=*', 2, -1, { window = winid })
@@ -141,7 +147,7 @@ end
 
 --- @param name string
 --- @param data PlugUiData
-M.on_update = function(name, data)
+function M.on_update(name, data)
   plugin_status[name] =
     vim.tbl_deep_extend('force', plugin_status[name] or {}, data)
   if
