@@ -14,7 +14,7 @@ local hooks = require('plug.hooks')
 local loader = require('plug.loader')
 local config = require('plug.config')
 
----@param opt? NvimPlugOpts
+---@param opt? PlugOpts
 function M.setup(opt)
   config.setup(opt)
 end

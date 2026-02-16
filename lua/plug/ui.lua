@@ -33,12 +33,13 @@ local function base()
   done = count_done(plugin_status)
   weight = vim.api.nvim_win_get_width(winid) - 10
   return {
-    'Plugins:(' .. done .. '/' .. total .. ')',
+    string.format('Plugins:(%s/%s)', done, total),
     '',
-    '[' .. string.rep('=', math.floor(done / total * weight)) .. string.rep(
-      ' ',
-      weight - math.floor(done / total * weight)
-    ) .. ']',
+    string.format(
+      '[%s%s]',
+      string.rep('=', math.floor(done / total * weight)),
+      string.rep(' ', weight - math.floor(done / total * weight))
+    ),
     '',
   }
 end
@@ -49,58 +50,58 @@ local function build_context()
 
   for k, plug in pairs(plugin_status) do
     if plug.is_local then
-      table.insert(b, '√ ' .. k .. ' skip local plugin')
+      table.insert(b, string.format('√ %s skip local plugin', k))
     elseif plug.command == 'pull' then
       if plug.pull_done then
-        table.insert(b, '√ ' .. k .. ' updated')
+        table.insert(b, string.format('√ %s updated', k))
       elseif plug.pull_done == false then
-        table.insert(b, '× ' .. k .. ' failed to update')
+        table.insert(b, string.format('× %s failed to update', k))
       elseif plug.pull_process and plug.pull_process ~= '' then
         table.insert(
           b,
-          '- ' .. k .. string.format(' updating: %s', plug.pull_process)
+          string.format('- %s updating: %s', k, plug.pull_process)
         )
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'clone' then
       if plug.clone_done then
-        table.insert(b, '√ ' .. k .. ' installed')
+        table.insert(b, string.format('√ %s installed', k))
       elseif plug.clone_done == false then
-        table.insert(b, '× ' .. k .. ' failed to install')
+        table.insert(b, string.format('× %s failed to install', k))
       elseif plug.clone_process and plug.clone_process ~= '' then
         table.insert(
           b,
-          '- ' .. k .. string.format(' cloning: %s', plug.clone_process)
+          string.format('- %s cloning: %s', k, plug.clone_process)
         )
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'build' then
       if plug.build_done then
-        table.insert(b, '√ ' .. k .. ' build done')
+        table.insert(b, string.format('√ %s build done', k))
       elseif plug.build_done == false then
-        table.insert(b, '× ' .. k .. ' failed to build')
+        table.insert(b, string.format('× %s failed to build', k))
       elseif plug.building == true then
-        table.insert(b, '- ' .. k .. string.format(' building'))
+        table.insert(b, string.format('- %s building', k))
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'curl' then
       if plug.curl_done then
-        table.insert(b, '√ ' .. k .. ' download')
+        table.insert(b, string.format('√ %s dowload', k))
       elseif plug.curl_done == false then
-        table.insert(b, '× ' .. k .. ' failed to download')
+        table.insert(b, string.format('× %s failed to dowload', k))
       else
-        table.insert(b, '- ' .. k .. string.format(' downloading'))
+        table.insert(b, string.format('- %s downloading', k))
       end
     elseif plug.command == 'luarocks' then
       if plug.luarocks_done then
-        table.insert(b, '√ ' .. k .. ' luarocks install done')
+        table.insert(b, string.format('√ luarocks install done', k))
       elseif plug.luarocks_done == false then
-        table.insert(b, '× ' .. k .. ' luarocks install failed')
+        table.insert(b, string.format('× %s luarocks install failed', k))
       else
-        table.insert(b, '- ' .. k .. string.format(' luarocks installing'))
+        table.insert(b, string.format('- %s luarocks installing', k))
       end
     end
   end
@@ -133,7 +134,11 @@ function M.open()
     vim.api.nvim_set_hl(0, 'PlugDone', { link = 'Type', default = true })
   end
   if vim.fn.hlexists('PlugFailed') == 0 then
-    vim.api.nvim_set_hl(0, 'PlugFailed', { link = 'WarningMsg', default = true })
+    vim.api.nvim_set_hl(
+      0,
+      'PlugFailed',
+      { link = 'WarningMsg', default = true }
+    )
   end
   if vim.fn.hlexists('PlugDoing') == 0 then
     vim.api.nvim_set_hl(0, 'PlugDoing', { link = 'Number', default = true })

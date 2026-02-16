@@ -5,10 +5,7 @@
 -- License: GPLv3
 --=============================================================================
 
----@class Plug.Config
-local M = {}
-
----@class NvimPlugOpts
+---@class PlugOpts
 -- set the bundle dir
 ---@field bundle_dir? string
 -- set the path where raw plugin is download to
@@ -18,22 +15,25 @@ local M = {}
 ---@field base_url? string
 -- default ui is `default`,
 -- to use `notify` for floating window notify
--- you need to install wsdjeg/notify.nvim
+-- you need to install `wsdjeg/notify.nvim`
 ---@field ui? 'default'|'notify'
 -- default is nil
 ---@field http_proxy? nil|string
 -- default is nil
 ---@field https_proxy? nil|string
 -- default history depth for `git clone`
----@field clone_depth? integer
+---@field clone_depth? integer|string
 -- plugin priority, readme [plugin priority] for more info
 ---@field enable_priority? boolean
 ---@field import? string
 ---@field enable_luarocks? boolean
 ---@field dev_path? nil|string
 
-M.bundle_dir = vim.fn.stdpath('data') .. '/repos'
-M.raw_plugin_dir = vim.fn.stdpath('data') .. '/repos/raw_plugin'
+---@class Plug.Config: PlugOpts
+local M = {}
+
+M.bundle_dir = vim.fs.joinpath(vim.fn.stdpath('data'), 'repos')
+M.raw_plugin_dir = vim.fs.joinpath(vim.fn.stdpath('data'), 'repos/raw_plugin')
 M.dev_path = nil
 M.max_processes = 5
 M.base_url = 'https://github.com'
@@ -43,7 +43,7 @@ M.import = 'plugins'
 M.enable_priority = false
 M.enable_luarocks = false
 
----@param opt? NvimPlugOpts
+---@param opt? PlugOpts
 function M.setup(opt)
   opt = opt or {}
 

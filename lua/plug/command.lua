@@ -3,7 +3,11 @@ local M = {}
 
 ---@param opt vim.api.keyset.create_user_command.command_args
 function M.run(opt)
-  if #opt.fargs > 0 and opt.fargs[1] == 'install' then
+  if vim.tbl_isempty(opt.fargs) then
+    return
+  end
+
+  if opt.fargs[1] == 'install' then
     local plugs = {} ---@type PluginSpec[]
     local all_plugins = require('plug').get()
     if #opt.fargs == 1 then
@@ -24,7 +28,7 @@ function M.run(opt)
     end
     return
   end
-  if #opt.fargs > 0 and opt.fargs[1] == 'update' then
+  if opt.fargs[1] == 'update' then
     local plugs = {} ---@type PluginSpec[]
     local all_plugins = require('plug').get()
     local force = false
@@ -53,7 +57,11 @@ end
 ---@param cursorpos integer
 ---@return string[] completions
 function M.complete(arglead, cmdline, cursorpos)
-  if vim.regex('^Plug[!]\\?\\s*\\S*$'):match_str(string.sub(cmdline, 1, cursorpos)) then
+  if
+    vim
+      .regex('^Plug[!]\\?\\s*\\S*$')
+      :match_str(string.sub(cmdline, 1, cursorpos))
+  then
     return vim.tbl_filter(function(t)
       return vim.startswith(t, arglead)
     end, { 'install', 'update' })

@@ -93,6 +93,7 @@ end
 -- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim stderr >{ "", "Error: command 'install' requires exclusive write access to D:/Scoop/apps/luarocks/current/rocks - try --force-lock to overwrite the lock" }
 -- [ 13:22:15:577 ] [ Debug ] [   plug ] luarocks install todo.nvim exit code 4 single 0
 
+---@param spec PluginSpec
 function H.luarocks_install(spec)
   if luarocks_running then
     table.insert(luarocks_tasks, { H.luarocks_install, spec })
@@ -250,7 +251,7 @@ function H.update_plugin(spec, force)
     on_update(spec.name, { command = 'pull', pull_done = false })
     return
   end
-  if vim.fn.isdirectory(spec.path .. '/.git') ~= 1 then
+  if vim.fn.isdirectory(vim.fs.joinpath(spec.path, '.git')) ~= 1 then
     -- if the directory is not git repo
     on_update(spec.name, { command = 'pull', pull_done = false })
     return

@@ -22,6 +22,7 @@ local add_raw_rtp = false ---@type boolean
 --- @field events? string[] lazy events to load this plugin
 --- @field cmds? string[] lazy cmds to load this plugins
 --- @field name? string plugin name
+--- @field desc? string plugin description
 --- @field branch? string branch name
 --- @field tag? string tag name
 --- @field url? string upstream url
@@ -42,7 +43,7 @@ local add_raw_rtp = false ---@type boolean
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
 --- @field loaded? boolean
 --- @field enabled? boolean|fun(): boolean
---- @field dev? boolean # if set to true, dev_path will be used if it is existed.
+--- @field dev? boolean if set to true, dev_path will be used if it is existed.
 --- @field dev_path? string development directory of the plugin
 --- @field load_time? integer loading time in ms
 --- @field module? string lua main module name

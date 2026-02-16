@@ -6,26 +6,26 @@ local rocks = {} ---@type table<string, { rtp: string }>
 local function get_installed_rocks()
   if vim.fn.executable('luarocks') == 0 then
     return {}
-  else
-    --- @type string
-    local installed_output = vim
-      .system({ 'luarocks', 'list', '--porcelain' }, { text = true })
-      :wait().stdout
-    for _, v in
-      ipairs(vim.tbl_map(
-        function(t) ---@param t string
-          return vim.split(t, '\t')
-        end,
-        vim.tbl_filter(function(t) ---@param t string
-          return t ~= ''
-        end, vim.split(installed_output, '\n'))
-      ))
-    do
-      ---@cast v string[]
-      rocks[v[1]] = {
-        rtp = M.unify_path(v[4]) .. v[1] .. '/' .. v[2],
-      }
-    end
+  end
+  --- @type string
+  local installed_output = vim
+    .system({ 'luarocks', 'list', '--porcelain' }, { text = true })
+    :wait().stdout
+
+  for _, v in
+    ipairs(vim.tbl_map(
+      function(t) ---@param t string
+        return vim.split(t, '\t')
+      end,
+      vim.tbl_filter(function(t) ---@param t string
+        return t ~= ''
+      end, vim.split(installed_output, '\n'))
+    ))
+  do
+    ---@cast v string[]
+    rocks[v[1]] = {
+      rtp = M.unify_path(v[4]) .. v[1] .. '/' .. v[2],
+    }
   end
 end
 
@@ -60,14 +60,14 @@ function M.enable()
     local luarocks_config = vim.json.decode(
       vim.system({ 'luarocks', 'config', '--json' }):wait().stdout
     )
-    package.path = package.path
-      .. ';'
-      .. luarocks_config.deploy_lua_dir
-      .. [[\?.lua]]
-      .. ';'
-      .. luarocks_config.deploy_lua_dir
-      .. [[\?\init.lua]]
-      .. ';'
+    package.path = string.format(
+      '%s;%s%s;%s%s;',
+      package.path,
+      luarocks_config.deploy_lua_dir,
+      [[\?.lua]],
+      luarocks_config.deploy_lua_dir,
+      [[\?\init.lua]]
+    )
     --- D:\Scoop\apps\luarocks\current\rocks\lib\lua\5.4\?.dll
     package.cpath = package.cpath
       .. ';'
