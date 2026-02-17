@@ -1,13 +1,17 @@
+local uv = vim.uv or vim.loop
+
+---@class Plug.Clock
 local M = {}
 
-local started = vim.uv.hrtime()
+local started = uv.hrtime()
 
 function M.start()
-  started = vim.uv.hrtime()
+  started = uv.hrtime()
 end
 
+---@return integer time
 function M.time()
-  return (vim.uv.hrtime() - started) / 1e6
+  return math.floor((uv.hrtime() - started) / 1e6)
 end
 
 return M

@@ -5,96 +5,103 @@
 -- License: GPLv3
 --=============================================================================
 
+---@class Plug.Ui
 local M = {}
 
-local bufnr = -1
-local winid = -1
-local done = 0
-local total = -1
-local weight = 100
-local plugin_status = {}
+local bufnr = -1 ---@type integer
+local winid = -1 ---@type integer
+local done = 0 ---@type integer
+local total = -1 ---@type integer
+local weight = 100 ---@type integer
+local plugin_status = {} ---@type table<string, PlugUiData>
 
-local function count_done(p)
+---@param data table<string, PlugUiData>
+---@return integer done
+local function count_done(data)
   done = 0
-  for _, v in pairs(p) do
+  for _, v in pairs(data) do
     if v.command and v[v.command .. '_done'] or v.is_local then
       done = done + 1
     end
   end
   return done
 end
-local base = function()
+
+---@return string[] base
+local function base()
   total = #vim.tbl_keys(plugin_status)
   done = count_done(plugin_status)
   weight = vim.api.nvim_win_get_width(winid) - 10
   return {
-    'Plugins:(' .. done .. '/' .. total .. ')',
+    string.format('Plugins:(%s/%s)', done, total),
     '',
-    '[' .. string.rep('=', math.floor(done / total * weight)) .. string.rep(
-      ' ',
-      weight - math.floor(done / total * weight)
-    ) .. ']',
+    string.format(
+      '[%s%s]',
+      string.rep('=', math.floor(done / total * weight)),
+      string.rep(' ', weight - math.floor(done / total * weight))
+    ),
     '',
   }
 end
 
+---@return string[] context
 local function build_context()
   local b = base()
 
   for k, plug in pairs(plugin_status) do
     if plug.is_local then
-      table.insert(b, '√ ' .. k .. ' skip local plugin')
+      table.insert(b, string.format('√ %s skip local plugin', k))
     elseif plug.command == 'pull' then
       if plug.pull_done then
-        table.insert(b, '√ ' .. k .. ' updated')
+        table.insert(b, string.format('√ %s updated', k))
       elseif plug.pull_done == false then
-        table.insert(b, '× ' .. k .. ' failed to update')
+        table.insert(b, string.format('× %s failed to update', k))
       elseif plug.pull_process and plug.pull_process ~= '' then
         table.insert(
           b,
-          '- ' .. k .. string.format(' updating: %s', plug.pull_process)
+          string.format('- %s updating: %s', k, plug.pull_process)
         )
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'clone' then
       if plug.clone_done then
-        table.insert(b, '√ ' .. k .. ' installed')
+        table.insert(b, string.format('√ %s installed', k))
       elseif plug.clone_done == false then
-        table.insert(b, '× ' .. k .. ' failed to install')
+        table.insert(b, string.format('× %s failed to install', k))
       elseif plug.clone_process and plug.clone_process ~= '' then
         table.insert(
           b,
-          '- ' .. k .. string.format(' cloning: %s', plug.clone_process)
+          string.format('- %s cloning: %s', k, plug.clone_process)
         )
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'build' then
       if plug.build_done then
-        table.insert(b, '√ ' .. k .. ' build done')
+        table.insert(b, string.format('√ %s build done', k))
       elseif plug.build_done == false then
-        table.insert(b, '× ' .. k .. ' failed to build')
+        table.insert(b, string.format('× %s failed to build', k))
       elseif plug.building == true then
-        table.insert(b, '- ' .. k .. string.format(' building'))
+        table.insert(b, string.format('- %s building', k))
       else
         table.insert(b, '- ' .. k)
       end
     elseif plug.command == 'curl' then
       if plug.curl_done then
-        table.insert(b, '√ ' .. k .. ' download')
+        table.insert(b, string.format('√ %s dowload', k))
       elseif plug.curl_done == false then
-        table.insert(b, '× ' .. k .. ' failed to download')
+        table.insert(b, string.format('× %s failed to dowload', k))
       else
-        table.insert(b, '- ' .. k .. string.format(' downloading'))
+        table.insert(b, string.format('- %s downloading', k))
       end
     elseif plug.command == 'luarocks' then
       if plug.luarocks_done then
-        table.insert(b, '√ ' .. k .. ' luarocks install done')
+        table.insert(b, string.format('√ luarocks install done', k))
       elseif plug.luarocks_done == false then
-        table.insert(b, '× ' .. k .. ' luarocks install failed')
+        table.insert(b, string.format('× %s luarocks install failed', k))
       else
-        table.insert(b, '- ' .. k .. string.format(' luarocks installing'))
+        table.insert(b, string.format('- %s luarocks installing', k))
       end
     end
   end
@@ -102,7 +109,7 @@ local function build_context()
   return b
 end
 
-M.open = function()
+function M.open()
   if not vim.api.nvim_buf_is_valid(bufnr) then
     bufnr = vim.api.nvim_create_buf(false, true)
   end
@@ -118,19 +125,23 @@ M.open = function()
   end
   --- setup highlight
   if vim.fn.hlexists('PlugTitle') == 0 then
-    vim.cmd('hi def link PlugTitle TODO')
+    vim.api.nvim_set_hl(0, 'PlugTitle', { link = 'TODO', default = true })
   end
   if vim.fn.hlexists('PlugProcess') == 0 then
-    vim.cmd('hi def link PlugProcess Repeat')
+    vim.api.nvim_set_hl(0, 'PlugProcess', { link = 'Repeat', default = true })
   end
   if vim.fn.hlexists('PlugDone') == 0 then
-    vim.cmd('hi def link PlugDone Type')
+    vim.api.nvim_set_hl(0, 'PlugDone', { link = 'Type', default = true })
   end
   if vim.fn.hlexists('PlugFailed') == 0 then
-    vim.cmd('hi def link PlugFailed WarningMsg')
+    vim.api.nvim_set_hl(
+      0,
+      'PlugFailed',
+      { link = 'WarningMsg', default = true }
+    )
   end
   if vim.fn.hlexists('PlugDoing') == 0 then
-    vim.cmd('hi def link PlugDoing Number')
+    vim.api.nvim_set_hl(0, 'PlugDoing', { link = 'Number', default = true })
   end
   vim.fn.matchadd('PlugTitle', '^Plugins.*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugProcess', '^\\[\\zs=*', 2, -1, { window = winid })
@@ -141,7 +152,7 @@ end
 
 --- @param name string
 --- @param data PlugUiData
-M.on_update = function(name, data)
+function M.on_update(name, data)
   plugin_status[name] =
     vim.tbl_deep_extend('force', plugin_status[name] or {}, data)
   if
