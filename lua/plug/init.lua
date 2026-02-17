@@ -20,6 +20,7 @@ function M.setup(opt)
 end
 
 --- @param plugins PluginSpec[]
+--- @param skip_deps? boolean
 function M.add(plugins, skip_deps)
   for _, plug in ipairs(plugins) do
     if plug.depends and not skip_deps then

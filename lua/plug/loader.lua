@@ -29,7 +29,7 @@ local add_raw_rtp = false ---@type boolean
 --- @field path? string download path
 --- @field build? string[]|string build commands
 --- @field is_local? boolean true for local plugin
---- @field when boolean|string|function
+--- @field when? boolean|string|function
 --- @field frozen? boolean if set to true, :PlugUpdate will not update this plugin without bang
 --- @field type? string "git", "raw" or "none"
 --- @field script_type? string "git", "raw" or "none"
