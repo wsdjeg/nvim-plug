@@ -158,7 +158,10 @@ function M.parser(spec)
     spec.autoload = true
   end
 
-  if type(spec.config_before) == 'function' and vim.is_callable(spec.config_before) then
+  if
+    type(spec.config_before) == 'function'
+    and vim.is_callable(spec.config_before)
+  then
     spec.config_before()
   end
 
@@ -231,7 +234,10 @@ function M.load(spec)
       for _, f in ipairs(plugin_directory_files) do
         vim.cmd.source(f)
       end
-      if type(spec.config_after) == 'function' and vim.is_callable(spec.config_after) then
+      if
+        type(spec.config_after) == 'function'
+        and vim.is_callable(spec.config_after)
+      then
         spec.config_after()
       end
     end
