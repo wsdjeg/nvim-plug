@@ -114,7 +114,8 @@ function M.open()
     bufnr = vim.api.nvim_create_buf(false, true)
   end
   if not vim.api.nvim_win_is_valid(winid) then
-    winid = vim.api.nvim_open_win(bufnr, false, {
+    local focus = require('plug.config').focus_window
+    winid = vim.api.nvim_open_win(bufnr, focus, {
       split = 'left',
     })
   end

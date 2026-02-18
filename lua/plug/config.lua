@@ -25,6 +25,8 @@
 ---@field clone_depth? integer|string
 -- plugin priority, readme [plugin priority] for more info
 ---@field enable_priority? boolean
+-- enables the user to focus to the UI window when opened
+---@field focus_window? boolean
 ---@field import? string
 ---@field enable_luarocks? boolean
 ---@field dev_path? nil|string
@@ -42,6 +44,7 @@ M.clone_depth = '1'
 M.import = 'plugins'
 M.enable_priority = false
 M.enable_luarocks = false
+M.focus_window = false
 
 ---@param opt? PlugOpts
 function M.setup(opt)
@@ -56,6 +59,7 @@ function M.setup(opt)
   M.clone_depth = opt.clone_depth or M.clone_depth
   M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
   M.enable_priority = opt.enable_priority or M.enable_priority
+  M.focus_window = opt.focus_window or M.focus_window
   M.import = opt.import or M.import
   M.dev_path = opt.dev_path or M.dev_path
   M.enable_luarocks = opt.enable_luarocks or M.enable_luarocks
