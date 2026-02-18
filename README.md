@@ -101,6 +101,8 @@ require('plug').setup({
   clone_depth = 1,
   -- plugin priority, readme [plugin priority] for more info
   enable_priority = false,
+  -- enables the user to focus to the UI window when opened
+  focus_window = false,
 })
 ```
 
