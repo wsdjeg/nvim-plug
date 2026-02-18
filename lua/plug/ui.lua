@@ -32,13 +32,14 @@ local function base()
   total = #vim.tbl_keys(plugin_status)
   done = count_done(plugin_status)
   weight = vim.api.nvim_win_get_width(winid) - 10
+  local reps = math.floor(done / total * weight)
   return {
     string.format('Plugins:(%s/%s)', done, total),
     '',
     string.format(
       '[%s%s]',
-      string.rep('=', math.floor(done / total * weight)),
-      string.rep(' ', weight - math.floor(done / total * weight))
+      string.rep('=', reps),
+      string.rep(' ', weight - reps)
     ),
     '',
   }
@@ -49,60 +50,59 @@ local function build_context()
   local b = base()
 
   for k, plug in pairs(plugin_status) do
+    local msg = '' ---@type string
     if plug.is_local then
-      table.insert(b, string.format('√ %s skip local plugin', k))
+      msg = string.format('√ %s skip local plugin', k)
     elseif plug.command == 'pull' then
       if plug.pull_done then
-        table.insert(b, string.format('√ %s updated', k))
+        msg = string.format('√ %s updated', k)
       elseif plug.pull_done == false then
-        table.insert(b, string.format('× %s failed to update', k))
+        msg = string.format('× %s failed to update', k)
       elseif plug.pull_process and plug.pull_process ~= '' then
-        table.insert(
-          b,
-          string.format('- %s updating: %s', k, plug.pull_process)
-        )
+        msg = string.format('- %s updating: %s', k, plug.pull_process)
       else
-        table.insert(b, '- ' .. k)
+        msg = '- ' .. k
       end
     elseif plug.command == 'clone' then
       if plug.clone_done then
-        table.insert(b, string.format('√ %s installed', k))
+        msg = string.format('√ %s installed', k)
       elseif plug.clone_done == false then
-        table.insert(b, string.format('× %s failed to install', k))
+        msg = string.format('× %s failed to install', k)
       elseif plug.clone_process and plug.clone_process ~= '' then
-        table.insert(
-          b,
-          string.format('- %s cloning: %s', k, plug.clone_process)
-        )
+        msg = string.format('- %s cloning: %s', k, plug.clone_process)
       else
-        table.insert(b, '- ' .. k)
+        msg = '- ' .. k
       end
     elseif plug.command == 'build' then
       if plug.build_done then
-        table.insert(b, string.format('√ %s build done', k))
+        msg = string.format('√ %s build done', k)
       elseif plug.build_done == false then
-        table.insert(b, string.format('× %s failed to build', k))
+        msg = string.format('× %s failed to build', k)
       elseif plug.building == true then
-        table.insert(b, string.format('- %s building', k))
+        msg = string.format('- %s building', k)
       else
-        table.insert(b, '- ' .. k)
+        msg = '- ' .. k
       end
     elseif plug.command == 'curl' then
       if plug.curl_done then
-        table.insert(b, string.format('√ %s dowload', k))
+        msg = string.format('√ %s dowload', k)
       elseif plug.curl_done == false then
-        table.insert(b, string.format('× %s failed to dowload', k))
+        msg = string.format('× %s failed to dowload', k)
       else
-        table.insert(b, string.format('- %s downloading', k))
+        msg = string.format('- %s downloading', k)
       end
     elseif plug.command == 'luarocks' then
       if plug.luarocks_done then
-        table.insert(b, string.format('√ luarocks install done', k))
+        msg = string.format('√ luarocks install done', k)
       elseif plug.luarocks_done == false then
-        table.insert(b, string.format('× %s luarocks install failed', k))
+        msg = string.format('× %s luarocks install failed', k)
       else
-        table.insert(b, string.format('- %s luarocks installing', k))
+        msg = string.format('- %s luarocks installing', k)
       end
+    end
+
+    if msg ~= '' then
+      table.insert(b, msg)
     end
   end
 
@@ -123,27 +123,23 @@ function M.open()
     vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_context())
     vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+
+    vim.keymap.set('n', 'q', M.close, { buffer = bufnr })
   end
+  local highlights = { ---@type table<string, vim.api.keyset.highlight>
+    PlugTitle = { link = 'TODO', default = true },
+    PlugDone = { link = 'Type', default = true },
+    PlugProcess = { link = 'Repeat', default = true },
+    PlugFailed = { link = 'WarningMsg', default = true },
+    PlugDoing = { link = 'Number', default = true },
+  }
   --- setup highlight
-  if vim.fn.hlexists('PlugTitle') == 0 then
-    vim.api.nvim_set_hl(0, 'PlugTitle', { link = 'TODO', default = true })
+  for group, opts in pairs(highlights) do
+    if vim.fn.hlexists(group) == 0 then
+      vim.api.nvim_set_hl(0, group, opts)
+    end
   end
-  if vim.fn.hlexists('PlugProcess') == 0 then
-    vim.api.nvim_set_hl(0, 'PlugProcess', { link = 'Repeat', default = true })
-  end
-  if vim.fn.hlexists('PlugDone') == 0 then
-    vim.api.nvim_set_hl(0, 'PlugDone', { link = 'Type', default = true })
-  end
-  if vim.fn.hlexists('PlugFailed') == 0 then
-    vim.api.nvim_set_hl(
-      0,
-      'PlugFailed',
-      { link = 'WarningMsg', default = true }
-    )
-  end
-  if vim.fn.hlexists('PlugDoing') == 0 then
-    vim.api.nvim_set_hl(0, 'PlugDoing', { link = 'Number', default = true })
-  end
+
   vim.fn.matchadd('PlugTitle', '^Plugins.*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugProcess', '^\\[\\zs=*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugDone', '^√.*', 2, -1, { window = winid })
@@ -157,12 +153,28 @@ function M.on_update(name, data)
   plugin_status[name] =
     vim.tbl_deep_extend('force', plugin_status[name] or {}, data)
   if
+    not (
+      vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_win_is_valid(winid)
+    )
+  then
+    return
+  end
+
+  vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_context())
+  vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+end
+
+function M.close()
+  if
     vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_win_is_valid(winid)
   then
-    vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, build_context())
-    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    return
   end
+
+  pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+  pcall(vim.api.nvim_win_close, winid, true)
+  bufnr, winid = -1, -1
 end
 
 return M
