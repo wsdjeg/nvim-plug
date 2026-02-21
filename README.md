@@ -15,17 +15,17 @@
 - [📦 Installation](#-installation)
 - [🔧 Configuration](#-configuration)
 - [⚙️ Basic Usage](#-basic-usage)
-    - [Add plugins](#add-plugins)
-    - [`import` option](#import-option)
-    - [Self upgrade](#self-upgrade)
+  - [Adding Plugins](#adding-plugins)
+  - [The `import` Option](#the-import-option)
+  - [Self-Upgrade](#self-upgrade)
 - [📄 Plugin Spec](#-plugin-spec)
 - [💻 Commands](#-commands)
 - [🎨 UI](#-ui)
-    - [Default UI](#default-ui)
-    - [Notify UI](#notify-ui)
-    - [Custom Plugin UI](#custom-plugin-ui)
-- [📊 Plugin priority](#-plugin-priority)
-- [🔍 Picker sources](#-picker-sources)
+  - [Default UI](#default-ui)
+  - [Notify UI](#notify-ui)
+  - [Custom Plugin UI](#custom-plugin-ui)
+- [📊 Plugin Priority](#-plugin-priority)
+- [🔍 Picker Sources](#-picker-sources)
 - [📣 Self-Promotion](#-self-promotion)
 - [💬 Feedback](#-feedback)
 
@@ -33,23 +33,23 @@
 
 ## 📘 Intro
 
-nvim-plug is an asynchronous Neovim plugin manager written in Lua.
+`nvim-plug` is an asynchronous Neovim plugin manager written in Lua.
 There is also a [Chinese introduction](https://wsdjeg.net/neovim-plugin-manager-nvim-plug/) about this plugin.
 
 ## ✨ Features
 
 - **🚀 Fast** — Fully implemented in Lua for minimal overhead and quick startup.
-- **⚡ Asynchronous operations** — Plugin download and build steps run in parallel using Neovim jobs.
+- **⚡ Asynchronous Operations** — Plugin download and build steps run in parallel using Neovim jobs.
 - **🛌 Flexible lazy-loading** — Load plugins on events, commands, mappings, filetypes, and more.
-- **📦 LuaRocks integration** — Install and manage LuaRocks dependencies seamlessly alongside plugins.
+- **📦 LuaRocks Integration** — Install and manage LuaRocks dependencies seamlessly alongside plugins.
 - **🎨 Custom UI** — Provides an extensible UI API for building your own installation/update interface.
 
 ## 📦 Installation
 
-To install nvim-plug automatically:
+To install `nvim-plug` automatically:
 
 ```lua
-local dir = vim.fn.stdpath('data') .. '/repos/'
+local dir = vim.fs.joinpath(vim.fn.stdpath('data'), 'repos/')
 
 local function bootstrap(repo)
   if vim.fn.isdirectory(dir .. repo) == 0 then
@@ -62,7 +62,7 @@ local function bootstrap(repo)
       dir .. repo,
     })
   end
-  vim.opt.runtimepath:append(dir .. repo)
+  vim.o.runtimepath = vim.o.runtimepath .. ',' .. dir .. repo
 end
 
 bootstrap('wsdjeg/job.nvim')
@@ -70,9 +70,9 @@ bootstrap('wsdjeg/logger.nvim')
 bootstrap('wsdjeg/nvim-plug')
 ```
 
-Using [luarocks](https://luarocks.org/)
+Using [LuaRocks](https://luarocks.org/):
 
-```
+```sh
 luarocks install nvim-plug
 ```
 
@@ -108,7 +108,7 @@ require('plug').setup({
 
 ## ⚙️ Basic Usage
 
-### Add plugins
+### Adding plugins
 
 ```lua
 require('plug').add({
@@ -145,15 +145,16 @@ require('plug').add({
 })
 ```
 
-### `import` option
+### The `import` Option
 
-The default `import` option is `plugins` which means nvim-plug will load `PluginSpec` automatically from `plugins` directory im runtimepath.
+The default `import` option is `plugins` which means nvim-plug will load `PluginSpec` automatically
+from `plugins` directory in runtimepath.
 
 To use this option, you need to call `plug.load()` function.
 
-### Self upgrade
+### Self-Upgrade
 
-you can use nvim-plug to manager nvim-plug:
+You can use `nvim-plug` to manage itself:
 
 ```lua
 if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/nvim-plug') == 0 then
@@ -166,7 +167,7 @@ if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/nvim-plug') == 0 then
     'D:/bundle_dir/wsdjeg/nvim-plug',
   })
 end
-vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/nvim-plug')
+vim.o.runtimepath = vim.o.runtimepath .. ',' .. ('D:/bundle_dir/wsdjeg/nvim-plug')
 require('plug').setup({
   -- set the bundle dir
   bundle_dir = 'D:/bundle_dir',
@@ -183,34 +184,34 @@ require('plug').add({
 
 The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
-| name            | description                                                                                                                 |
+| Name            | Description                                                                                                                 |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `[1]`           | `string`, plugin repo short name, `wsdjeg/flygrep.nvim`                                                                     |
-| `cmds`          | `string`, or `table<string>`, commands lazy loading                                                                         |
-| `events`        | `string`, or `table<string>`, events lazy loading                                                                           |
-| `keys`          | `table`, key bindings for this plugin                                                                                       |
-| `opts`          | `table`, setup opts for this plugin                                                                                         |
-| `config`        | `function`, function called after adding plugin path to nvim rtp, before loading files in `plugin/` directory               |
-| `config_after`  | `function`, function called after loading files in `plugin/` directory                                                      |
-| `config_before` | `function`, function called when `plug.add()` function is called                                                            |
-| `on_ft`         | `string`, or `table<string>`, filetypes lazy loading                                                                        |
-| `on_map`        | `string`, or `table<string>`, key bindings lazy loading                                                                     |
-| `on_func`       | `string`, or `table<string>`, vim function lazy loading                                                                     |
-| `script_type`   | `string`, plugin type including `color`, `plugin`, etc..                                                                    |
-| `build`         | `string`, or `table<string>`, executed by [job.nvim](https://github.com/wsdjeg/job.nvim)                                    |
-| `enabled`       | `boolean`, or `function` evaluated when startup, when it is false, plugin will be skiped                                    |
-| `frozen`        | `booleadn`, update only when specific with `PlugUpdate name`                                                                |
-| `depends`       | `table<PluginSpec>`, a list of plugins                                                                                      |
-| `branch`        | `string`, specific git branch                                                                                               |
-| `tag`           | `string`, specific git tag                                                                                                  |
-| `type`          | `string`, specific plugin type, this can be git, rocks, raw or none, if it is raw, `script_type` must be set                |
-| `autoload`      | `boolean`, load plugin after git clone                                                                                      |
-| `priority`      | `number`, default is 50, set the order in which plugins are loaded                                                          |
-| `fetch`         | `boolean`, If set to true, nvim-plug doesn't add the path to user runtimepath. It is useful to manager no-plugin repository |
-| `dev`           | `boolead`, default is false, if true, then dev path will be used instead if bundle path                                     |
-| `desc`          | `string`, short description of the plugin                                                                                   |
+| `[1]`           | (`string`) plugin repo short name, e.g. `wsdjeg/flygrep.nvim`                                                               |
+| `autoload`      | (`boolean`) load plugin after `git clone`                                                                                   |
+| `branch`        | (`string`) specify a git branch                                                                                             |
+| `build`         | (`string\|string[]`) custom build command executed by [job.nvim](https://github.com/wsdjeg/job.nvim)                        |
+| `cmds`          | (`string\|string[]`) commands lazy loading                                                                                  |
+| `config_after`  | (`function`) function called after loading files in `plugin/` directory                                                     |
+| `config_before` | (`function`) function called after running `plug.add()`                                                                     |
+| `config`        | (`function`) function called after adding plugin path to Neovim's runtimepath, before loading files in `plugin/` directory  |
+| `depends`       | (`PluginSpec[]`) a list of dependencies for a plugin                                                                        |
+| `desc`          | (`string`) short description of the plugin                                                                                  |
+| `dev`           | (`boolead`) default is `false`. If `true`, then dev path will be used instead if bundle path                                |
+| `enabled`       | (`boolean\|function`) evaluated when startup. If `false` the plugin will be skiped                                          |
+| `events`        | (`string\|string[]`) events to lazy-load the plugin                                                                         |
+| `fetch`         | (`boolean`) if set to `true`, nvim-plug won't add the path to user runtimepath. Useful to manage no-plugin repositories     |
+| `frozen`        | (`booleadn`) update only when specific with `Plug update name`                                                              |
+| `keys`          | (`table`) key bindings for this plugin                                                                                      |
+| `on_ft`         | (`string\|string[]`) filetypes lazy loading                                                                                 |
+| `on_func`       | (`string\|string[]`) Vim function lazy loading                                                                              |
+| `on_map`        | (`string\|string[]`) keybindings lazy loading                                                                               |
+| `opts`          | (`table`) setup options for the plugin                                                                                      |
+| `priority`      | (`integer`) set the order in which plugins are loaded, default: `50`                                                        |
+| `script_type`   | (`string`) plugin type including `color`, `plugin`, etc.                                                                    |
+| `tag`           | (`string`) specific Git tag                                                                                                 |
+| `type`          | (`'git'\|'rocks'\|'raw'\|'none'`) specific plugin type. If it is `raw` then `script_type` must be set                       |
 
-- `config` and `config_after` function will be not be called if the plugin has not been installed.
+- `config` and `config_after` will be not be called until the plugin has been installed.
 - `priority` does not work for lazy plugins.
 - if `dev` is true, and the develop directory exists, it will be added to runtimepath.
 - `keys` is not lazy mapping, use `on_map` instead.
@@ -220,20 +221,20 @@ The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 - `:Plug install`: install specific plugin or all plugins
 - `:Plug update`: update specific plugin or all plugins
 
-`:PlugInstall` and `:PlugUpdate` is deprecated, and will be removed when 1.0.0 released.
+`:PlugInstall` and `:PlugUpdate` are deprecated and will be removed when v1.0.0 is released.
 
 ## 🎨 UI
 
 ### Default UI
 
-The default is ui is inspired by [vundle](https://github.com/VundleVim/Vundle.vim)
+The default is UI is inspired by [Vundle.vim](https://github.com/VundleVim/Vundle.vim).
 
-The default highlight group.
+The default highlight groups are:
 
-| highlight group name | default link | description                     |
+| Highlight Group Name | Default Link | Description                     |
 | -------------------- | ------------ | ------------------------------- |
 | `PlugTitle`          | `TODO`       | the first line of plugin window |
-| `PlugProcess`        | `Repeat`     | the process of downloading      |
+| `PlugProcess`        | `Repeat`     | the downloading progress        |
 | `PlugDone`           | `Type`       | clone/build/install done        |
 | `PlugFailed`         | `WarningMsg` | clone/build/install failed      |
 | `PlugDoing`          | `Number`     | job is running                  |
@@ -241,69 +242,56 @@ The default highlight group.
 To change the default highlight group:
 
 ```lua
-vim.cmd('hi def link PlugTitle TODO')
-vim.cmd('hi def link PlugProcess Repeat')
-vim.cmd('hi def link PlugDone Type')
-vim.cmd('hi def link PlugFailed WarningMsg')
-vim.cmd('hi def link PlugDoing Number')
+-- In Lua
+vim.api.nvim_set_hl(0, 'PlugTitle', { default = true, link = 'TODO' })
+vim.api.nvim_set_hl(0, 'PlugProcess', { default = true, link = 'Repeat' })
+vim.api.nvim_set_hl(0, 'PlugDone', { default = true, link = 'Type' })
+vim.api.nvim_set_hl(0, 'PlugFailed', { default = true, link = 'WarningMsg' })
+vim.api.nvim_set_hl(0, 'PlugDoing', { default = true, link = 'Number' })
+```
+
+```vim
+" In Vimscript
+hi def link PlugTitle TODO
+hi def link PlugProcess Repeat
+hi def link PlugDone Type
+hi def link PlugFailed WarningMsg
+hi def link PlugDoing Number
 ```
 
 ### Notify UI
 
-You can also change the ui to `notify`:
-
 ![plug-notify](https://github.com/user-attachments/assets/74c16409-02e9-4042-9874-17e656e4295a)
 
-This UI is based on [notify.nvim](https://github.com/wsdjeg/notify.nvim). So you need to install it before using nvim-plug:
+You can also change the UI to `notify`, provided by [wsdjeg/notify.nvim](https://github.com/wsdjeg/notify.nvim).
+
+**You need to install it before using nvim-plug**!
 
 ```lua
-if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/nvim-plug') == 0 then
-  vim.fn.system({
-    'git',
-    'clone',
-    '--depth',
-    '1',
-    'https://github.com/wsdjeg/nvim-plug.git',
-    'D:/bundle_dir/wsdjeg/nvim-plug',
-  })
+local function bootstrap(repo)
+  if vim.fn.isdirectory(dir .. repo) == 0 then
+    vim.fn.system({
+      'git',
+      'clone',
+      '--depth',
+      '1',
+      'https://github.com/' .. repo .. '.git',
+      dir .. repo,
+    })
+  end
+  vim.o.runtimepath = vim.o.runtimepath .. ',' .. dir .. repo
 end
-vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/nvim-plug')
-if vim.fn.isdirectory('D:/bundle_dir/wsdjeg/notify.nvim') == 0 then
-  vim.fn.system({
-    'git',
-    'clone',
-    '--depth',
-    '1',
-    'https://github.com/wsdjeg/notify.nvim.git',
-    'D:/bundle_dir/wsdjeg/notify.nvim',
-  })
-end
-vim.opt.runtimepath:append('D:/bundle_dir/wsdjeg/notify.nvim')
+
+bootstrap('wsdjeg/job.nvim')
+bootstrap('wsdjeg/logger.nvim')
+bootstrap('wsdjeg/notify.nvim')
+bootstrap('wsdjeg/nvim-plug')
 
 require('plug').setup({
-
-  bundle_dir = 'D:/bundle_dir',
-  raw_plugin_dir = 'D:/bundle_dir/raw_plugin',
   ui = 'notify',
-  http_proxy = 'http://127.0.0.1:7890',
-  https_proxy = 'http://127.0.0.1:7890',
-  enable_priority = true,
-  max_processes = 16,
 })
 
 require('plug').add({
-  {
-    'wsdjeg/logger.nvim',
-    config = function()
-      require('logger').setup({ level = 0 })
-      vim.keymap.set(
-        'n',
-        '<leader>hL',
-        '<cmd>lua require("logger").viewRuntimeLog()<cr>',
-        { silent = true }
-      )
-    end,
-  },
   {
     'wsdjeg/notify.nvim',
     fetch = true,
@@ -317,21 +305,25 @@ require('plug').add({
 
 ### Custom Plugin UI
 
-To setup custom UI, you need to creat a on_update function, this function is called with two arges, `name` and `plugUiData`.
+To setup custom UI, you need to create an `on_update()` function.
+This function requires two parameters:
 
-The plugUiData is table with following keys:
+- `name` (`string`)
+- `plugUiData` (_see below_)
 
-| key             | description                                          |
-| --------------- | ---------------------------------------------------- |
-| `clone_done`    | boolead, is true when clone successfully             |
-| `command`       | string, clone, pull, curl or build                   |
-| `clone_process` | string, git clone progress, such as `16% (160/1000)` |
-| `clone_done`    | boolean, git clone exit status                       |
-| `building`      | boolean                                              |
-| `build_done`    | boolean                                              |
-| `pull_done`     | boolean                                              |
-| `pull_process`  | string                                               |
-| `curl_done`     | boolean                                              |
+`plugUiData` is table with following keys:
+
+| key             | description                                               |
+| --------------- | --------------------------------------------------------- |
+| `build_done`    | (`boolean`)                                               |
+| `building`      | (`boolean`)                                               |
+| `clone_done`    | (`boolean`) `git clone` exit status                       |
+| `clone_done`    | (`boolean`) `true` when cloned successfully               |
+| `clone_process` | (`string`) `git clone` progress, such as `16% (160/1000)` |
+| `command`       | (`'clone'\|'pull'\|'curl'\|'build'`)                      |
+| `curl_done`     | (`boolean`)                                               |
+| `pull_done`     | (`boolean`)                                               |
+| `pull_process`  | (`string`)                                                |
 
 ```lua
 --- your custom UI
@@ -342,20 +334,18 @@ end
 
 
 require('plug').setup({
-  bundle_dir = 'D:/bundle_dir',
-  max_processes = 5, -- max number of processes used for nvim-plug job
-  base_url = 'https://github.com',
-  ui = on_ui_update, -- default ui is notify, use `default` for split window UI
+  ui = on_ui_update,
 })
 ```
 
-## 📊 Plugin priority
+## 📊 Plugin Priority
 
-By default this feature is disabled, plugins will be loaded when run `add({plugins})` function.
-To enable plugin priority feature, you need to call `plug.load()` after `plug.add()` function.
-This option is not for lazy plugins.
+By default this feature is disabled. Plugins will be loaded when running `add()`.
+To enable plugin the priority feature you will have to run `plug.load()` after executing`plug.add()`.
 
-for example:
+This option is not available for lazy-loading!
+
+For example:
 
 ```lua
 require('plug').setup({
@@ -382,30 +372,26 @@ require('plug').add({
   },
   {
     'rakr/vim-one',
+    priority = 100,
     config = function()
       vim.cmd('colorscheme one')
     end,
-    priority = 100,
   },
 })
 require('plug').load()
 ```
 
-## 🔍 Picker sources
+## 🔍 Picker Sources
 
-nvim-plug also provides a source for [picker.nvim](https://github.com/wsdjeg/picker.nvim),
-which can be opened by following command:
+`nvim-plug` also provides a source for [picker.nvim](https://github.com/wsdjeg/picker.nvim),
+which can be opened with `:Picker plug`.
 
-```
-:Picker plug
-```
-
-| action        | key binding | description                                                                                            |
-| ------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
-| open_terminal | `<C-t>`     | open floating terminal with plugin.dir, need [terminal.nvim](https://github.com/wsdjeg/terminal.nvim). |
-| open_plug_url | `<C-b>`     | open the url of selected plugin via default browser.                                                   |
-| copy_plug_url | `<C-y>`     | copy the url of selected plugin, use register `"`.                                                     |
-| tabnew_lcd    | `<Enter>`   | create new tab, change current dir to the plugin root                                                  |
+| Action          | Key Binding | Description                                                                                                  |
+| --------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| `open_terminal` | `<C-t>`     | open floating terminal with `plugin.dir`. Requires [terminal.nvim](https://github.com/wsdjeg/terminal.nvim). |
+| `open_plug_url` | `<C-b>`     | open the URL of the selected plugin via default browser.                                                     |
+| `copy_plug_url` | `<C-y>`     | copy the URL of the selected plugin. Use the `"` register.                                                   |
+| `tabnew_lcd`    | `<Enter>`   | create new tab, then change current dir to the plugin root                                                   |
 
 ## 📣 Self-Promotion
 
@@ -417,4 +403,5 @@ Love this plugin? Follow [me](https://wsdjeg.net/) on
 
 ## 💬 Feedback
 
-If you encounter any bugs or have suggestions, please file an issue in the [issue tracker](https://github.com/wsdjeg/nvim-plug/issues).
+If you encounter any bugs or have suggestions, please file an issue in the
+[issue tracker](https://github.com/wsdjeg/nvim-plug/issues).
