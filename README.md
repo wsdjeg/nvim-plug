@@ -1,5 +1,6 @@
 # nvim-plug
 
+[![Run Tests](https://github.com/wsdjeg/nvim-plug/actions/workflows/test.yml/badge.svg)](https://github.com/wsdjeg/nvim-plug/actions/workflows/test.yml)
 [![GitHub License](https://img.shields.io/github/license/wsdjeg/nvim-plug)](LICENSE)
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/wsdjeg/nvim-plug)](https://github.com/wsdjeg/nvim-plug/issues)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/wsdjeg/nvim-plug)](https://github.com/wsdjeg/nvim-plug/commits/master/)

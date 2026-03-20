@@ -1,0 +1,46 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        nvim-version: ['stable', 'nightly']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.nvim-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep curl
+      
+      - name: Download luaunit to test directory
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/bluebird75/luaunit/master/luaunit.lua -o test/luaunit.lua
+
+      - name: Download job.nvim to test directory
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/wsdjeg/job.nvim/master/lua/job/init.lua -o test/job.lua
+      
+      - name: Run tests
+        run: make test
+
