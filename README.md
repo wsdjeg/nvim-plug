@@ -165,6 +165,7 @@ from `plugins` directory in runtimepath.
 To use this option, you need to call `plug.load()` function.
 
 Example structure:
+
 ```
 ~/.config/nvim/
   ├── init.lua
@@ -175,6 +176,7 @@ Example structure:
 ```
 
 Each file in the `plugins/` directory should return a PluginSpec table:
+
 ```lua
 -- plugins/colorscheme.lua
 return {
@@ -187,6 +189,7 @@ return {
 ```
 
 Or return a list of PluginSpec:
+
 ```lua
 -- plugins/lsp.lua
 return {
@@ -202,6 +205,7 @@ return {
 ```
 
 Then in your `init.lua`:
+
 ```lua
 require('plug').setup({
   import = 'plugins',  -- default value
@@ -267,34 +271,34 @@ require('plug').add({
 
 The plugin spec is inspired by [dein.nvim](https://github.com/Shougo/dein.vim).
 
-| Name            | Description                                                                                                                 |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `[1]`           | (`string`) plugin repo short name, e.g. `wsdjeg/flygrep.nvim`                                                               |
-| `autoload`      | (`boolean`) load plugin after `git clone` (default: `true` for git plugins, `false` for raw plugins)                        |
-| `branch`        | (`string`) specify a git branch                                                                                             |
-| `build`         | (`string\|string[]`) custom build command executed by [job.nvim](https://github.com/wsdjeg/job.nvim)                        |
-| `cmds`          | (`string\|string[]`) commands lazy loading                                                                                  |
-| `config_after`  | (`function`) function called after loading files in `plugin/` directory                                                     |
-| `config_before` | (`function`) function called after running `plug.add()`                                                                     |
-| `config`        | (`function`) function called after adding plugin path to Neovim's runtimepath, before loading files in `plugin/` directory  |
-| `depends`       | (`PluginSpec[]`) a list of dependencies for a plugin                                                                        |
-| `desc`          | (`string`) short description of the plugin                                                                                  |
-| `dev`           | (`boolean`) default is `false`. If `true`, then dev path will be used instead of bundle path                                |
-| `dev_path`      | (`string`) development directory for this plugin (auto-set when `dev = true`)                                               |
-| `enabled`       | (`boolean\|function`) evaluated when startup. If `false` the plugin will be skiped                                          |
-| `events`        | (`string\|string[]`) events to lazy-load the plugin                                                                         |
-| `fetch`         | (`boolean`) if set to `true`, nvim-plug won't add the path to user runtimepath. Useful to manage no-plugin repositories     |
-| `frozen`        | (`boolean`) update only when specific with `Plug update name`                                                               |
-| `keys`          | (`table`) key bindings for this plugin (set immediately, not lazy)                                                          |
-| `module`        | (`string`) Lua module name (auto-inferred from plugin name, used with `opts`)                                               |
-| `on_ft`         | (`string\|string[]`) filetypes lazy loading                                                                                 |
-| `on_func`       | (`string\|string[]`) Vim function lazy loading                                                                              |
-| `on_map`        | (`string\|string[]`) keybindings lazy loading                                                                               |
-| `opts`          | (`table`) setup options for the plugin (passed to `require(module).setup(opts)`)                                            |
-| `priority`      | (`integer`) set the order in which plugins are loaded, default: `50`                                                        |
-| `script_type`   | (`string`) plugin type including `color`, `plugin`, etc.                                                                    |
-| `tag`           | (`string`) specific Git tag                                                                                                 |
-| `type`          | (`'git'\|'rocks'\|'raw'\|'none'`) specific plugin type. If it is `raw` then `script_type` must be set                       |
+| Name            | Description                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `[1]`           | (`string`) plugin repo short name, e.g. `wsdjeg/flygrep.nvim`                                                              |
+| `autoload`      | (`boolean`) load plugin after `git clone` (default: `true` for git plugins, `false` for raw plugins)                       |
+| `branch`        | (`string`) specify a git branch                                                                                            |
+| `build`         | (`string\|string[]`) custom build command executed by [job.nvim](https://github.com/wsdjeg/job.nvim)                       |
+| `cmds`          | (`string\|string[]`) commands lazy loading                                                                                 |
+| `config_after`  | (`function`) function called after loading files in `plugin/` directory                                                    |
+| `config_before` | (`function`) function called after running `plug.add()`                                                                    |
+| `config`        | (`function`) function called after adding plugin path to Neovim's runtimepath, before loading files in `plugin/` directory |
+| `depends`       | (`PluginSpec[]`) a list of dependencies for a plugin                                                                       |
+| `desc`          | (`string`) short description of the plugin                                                                                 |
+| `dev`           | (`boolean`) default is `false`. If `true`, then dev path will be used instead of bundle path                               |
+| `dev_path`      | (`string`) development directory for this plugin (auto-set when `dev = true`)                                              |
+| `enabled`       | (`boolean\|function`) evaluated when startup. If `false` the plugin will be skiped                                         |
+| `events`        | (`string\|string[]`) events to lazy-load the plugin                                                                        |
+| `fetch`         | (`boolean`) if set to `true`, nvim-plug won't add the path to user runtimepath. Useful to manage no-plugin repositories    |
+| `frozen`        | (`boolean`) update only when specific with `Plug update name`                                                              |
+| `keys`          | (`table`) key bindings for this plugin (set immediately, not lazy)                                                         |
+| `module`        | (`string`) Lua module name (auto-inferred from plugin name, used with `opts`)                                              |
+| `on_ft`         | (`string\|string[]`) filetypes lazy loading                                                                                |
+| `on_func`       | (`string\|string[]`) Vim function lazy loading                                                                             |
+| `on_map`        | (`string\|string[]`) keybindings lazy loading                                                                              |
+| `opts`          | (`table`) setup options for the plugin (passed to `require(module).setup(opts)`)                                           |
+| `priority`      | (`integer`) set the order in which plugins are loaded, default: `50`                                                       |
+| `script_type`   | (`string`) plugin type including `color`, `plugin`, etc.                                                                   |
+| `tag`           | (`string`) specific Git tag                                                                                                |
+| `type`          | (`'git'\|'rocks'\|'raw'\|'none'`) specific plugin type. If it is `raw` then `script_type` must be set                      |
 
 ### Notes
 
@@ -354,8 +358,8 @@ require('plug').add({
 
 `nvim-plug` provides the following commands:
 
-| Command         | Description                                      |
-| --------------- | ------------------------------------------------ |
+| Command                     | Description                               |
+| --------------------------- | ----------------------------------------- |
 | `:Plug install [plugin...]` | Install specific plugin(s) or all plugins |
 | `:Plug update [plugin...]`  | Update specific plugin(s) or all plugins  |
 | `:PlugInstall [plugin...]`  | (Deprecated) Same as `:Plug install`      |
@@ -469,18 +473,18 @@ This function requires two parameters:
 
 `plugUiData` is table with following keys:
 
-| Key              | Type                | Description                                               |
-| ---------------- | ------------------- | --------------------------------------------------------- |
-| `command`        | `string`            | Current operation: `'clone'`, `'pull'`, `'curl'`, `'build'`, `'luarocks'` |
-| `build_done`     | `boolean`           | Build completed successfully                              |
-| `building`       | `boolean`           | Build is in progress                                      |
-| `clone_done`     | `boolean`           | `git clone` completed successfully                        |
-| `clone_process`  | `string`            | `git clone` progress, e.g., `16% (160/1000)`              |
-| `curl_done`      | `boolean`           | Download completed successfully                           |
-| `is_local`       | `boolean`           | Plugin is a local plugin (skipped)                        |
-| `luarocks_done`  | `boolean`           | LuaRocks installation completed                           |
-| `pull_done`      | `boolean`           | `git pull` completed successfully                         |
-| `pull_process`   | `string`            | `git pull` progress information                           |
+| Key             | Type      | Description                                                               |
+| --------------- | --------- | ------------------------------------------------------------------------- |
+| `command`       | `string`  | Current operation: `'clone'`, `'pull'`, `'curl'`, `'build'`, `'luarocks'` |
+| `build_done`    | `boolean` | Build completed successfully                                              |
+| `building`      | `boolean` | Build is in progress                                                      |
+| `clone_done`    | `boolean` | `git clone` completed successfully                                        |
+| `clone_process` | `string`  | `git clone` progress, e.g., `16% (160/1000)`                              |
+| `curl_done`     | `boolean` | Download completed successfully                                           |
+| `is_local`      | `boolean` | Plugin is a local plugin (skipped)                                        |
+| `luarocks_done` | `boolean` | LuaRocks installation completed                                           |
+| `pull_done`     | `boolean` | `git pull` completed successfully                                         |
+| `pull_process`  | `string`  | `git pull` progress information                                           |
 
 ```lua
 --- your custom UI
@@ -494,7 +498,7 @@ local function on_ui_update(name, data)
   elseif data.build_done then
     print(string.format('✓ %s built', name))
   end
-  
+
   -- Handle errors
   if data.clone_done == false then
     print(string.format('✗ %s failed to install', name))
