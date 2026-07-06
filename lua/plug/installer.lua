@@ -318,7 +318,7 @@ function M.update(specs, force)
     elseif v.type == 'raw' then
       H.download_raw(v, force)
     elseif v.type == 'rocks' then
-      require('plug.rocks').update(v)
+      H.luarocks_install(v)
     else
       H.update_plugin(v, force)
     end
