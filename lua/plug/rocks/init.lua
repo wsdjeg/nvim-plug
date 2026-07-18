@@ -61,18 +61,16 @@ function M.enable()
       vim.system({ 'luarocks', 'config', '--json' }):wait().stdout
     )
     package.path = string.format(
-      '%s;%s%s;%s%s;',
+      '%s;%s/?.lua;%s/?/init.lua;',
       package.path,
       luarocks_config.deploy_lua_dir,
-      [[\?.lua]],
-      luarocks_config.deploy_lua_dir,
-      [[\?\init.lua]]
+      luarocks_config.deploy_lua_dir
     )
     --- D:\Scoop\apps\luarocks\current\rocks\lib\lua\5.4\?.dll
     package.cpath = package.cpath
       .. ';'
       .. luarocks_config.deploy_lib_dir
-      .. '\\?.'
+      .. '/?.'
       .. luarocks_config.external_lib_extension
     vim.env.LUA_PATH = package.path
     vim.env.LUA_CPATH = package.cpath
