@@ -43,12 +43,12 @@ local luarocks_running = false
 
 function H.run_first_task()
   local task = table.remove(tasks, 1)
-  task[1](task[2], tasks[3])
+  task[1](task[2], task[3])
 end
 
 function H.run_first_luarocks_task()
   local task = table.remove(luarocks_tasks, 1)
-  task[1](task[2], tasks[3])
+  task[1](task[2], task[3])
 end
 
 --- @param spec PluginSpec
@@ -151,7 +151,7 @@ end
 --- @param force? boolean
 function H.download_raw(spec, force)
   if processes >= config.max_processes then
-    table.insert(tasks, { H.download_raw, spec })
+    table.insert(tasks, { H.download_raw, spec, force })
     return
   elseif vim.fn.filereadable(spec.path) == 1 and not force then
     on_update(spec.name, { command = 'curl', curl_done = true })
