@@ -20,7 +20,7 @@ local plugin_status = {} ---@type table<string, PlugUiData>
 local function count_done(data)
   done = 0
   for _, v in pairs(data) do
-    if v.command and v[v.command .. '_done'] or v.is_local then
+    if v.is_local or (v.command and v[v.command .. '_done'] ~= nil) then
       done = done + 1
     end
   end
