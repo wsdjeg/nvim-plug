@@ -1,6 +1,8 @@
 ---@class Plug.Rocks
 local M = {}
 
+local util = require('plug.util')
+
 local rocks = {} ---@type table<string, { rtp: string }>
 
 local function get_installed_rocks()
@@ -24,31 +26,9 @@ local function get_installed_rocks()
   do
     ---@cast v string[]
     rocks[v[1]] = {
-      rtp = M.unify_path(v[4]) .. v[1] .. '/' .. v[2],
+      rtp = util.unify_path(v[4]) .. v[1] .. '/' .. v[2],
     }
   end
-end
-
-local is_win = vim.fn.has('win32') == 1
-
----@param _path string
-function M.unify_path(_path, ...)
-  local mod = select(1, ...)
-  if mod == nil then
-    mod = ':p'
-  end
-  local path = vim.fn.fnamemodify(_path, mod .. ':gs?[\\\\/]?/?')
-  if is_win and vim.regex('^[a-zA-Z]:/'):match_str(path) then
-    path = string.upper(string.sub(path, 1, 1)) .. string.sub(path, 2)
-  end
-  if vim.fn.isdirectory(path) == 1 and string.sub(path, -1) ~= '/' then
-    return path .. '/'
-  end
-  if string.sub(_path, -1) == '/' and string.sub(path, -1) ~= '/' then
-    return path .. '/'
-  end
-
-  return path
 end
 
 local enabled ---@type boolean
@@ -98,3 +78,4 @@ function M.set_rtp(spec)
 end
 
 return M
+
