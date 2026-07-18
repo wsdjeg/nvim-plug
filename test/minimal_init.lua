@@ -9,29 +9,22 @@ vim.opt.backup = false
 vim.opt.undofile = false
 vim.opt.verbose = 1
 
--- Set up package path
+-- Set up package path for:
+-- 1. lua/?.lua - Main plugin source code
+-- 2. test/?.lua - Mock modules (like job.lua)
+-- 3. test/.deps/?.lua - Test dependencies (luaunit)
+package.path = 'lua/?.lua;test/?.lua;test/.deps/?.lua;' .. package.path
 vim.opt.runtimepath:prepend('.')
 
 -- Create temporary test directory
-local test_dir = vim.fn.tempname() .. '_chat_nvim_test'
-vim.fn.mkdir(test_dir, 'p')
+local test_bundle_dir = vim.fn.tempname() .. '_nvim_plug_test'
+vim.fn.mkdir(test_bundle_dir, 'p')
 
 -- Load plugin with test configuration
 local ok, err = pcall(function()
-  require('chat').setup({
-    provider = 'test-provider',
-    model = 'test-model',
-    api_key = {
-      test_provider = 'test-key',
-    },
-    memory = {
-      enable = true,
-      storage_dir = test_dir .. '/memory/',
-    },
-    http = {
-      api_key = '', -- Disable HTTP server for tests
-    },
-    allowed_path = vim.fn.getcwd(),
+  require('plug').setup({
+    bundle_dir = test_bundle_dir,
+    raw_plugin_dir = test_bundle_dir .. '/raw_plugin',
   })
 end)
 
@@ -39,5 +32,6 @@ if not ok then
   print('Error initializing test environment: ' .. err)
 else
   print('Test environment initialized successfully')
-  print('Test directory: ' .. test_dir)
+  print('Test bundle directory: ' .. test_bundle_dir)
 end
+

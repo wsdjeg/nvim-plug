@@ -1,0 +1,18 @@
+# Test dependencies (auto-installed by make install-deps)
+test/.deps/
+
+# Swap files
+*.swp
+*.swo
+
+# Backup files
+*~
+*.bak
+
+# Lua bytecode
+*.luac
+
+# OS files
+.DS_Store
+Thumbs.db
+

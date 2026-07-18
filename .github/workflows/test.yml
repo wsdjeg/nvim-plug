@@ -13,10 +13,13 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         nvim-version: ['stable', 'nightly']
+    
+    runs-on: ${{ matrix.os }}
     
     steps:
       - name: Checkout repository
@@ -28,19 +31,28 @@ jobs:
           neovim: true
           version: ${{ matrix.nvim-version }}
 
-      - name: Install dependencies
+      - name: Install dependencies (ubuntu)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y ripgrep curl
-      
-      - name: Download luaunit to test directory
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/bluebird75/luaunit/master/luaunit.lua -o test/luaunit.lua
 
-      - name: Download job.nvim to test directory
+      - name: Install dependencies (macos)
+        if: runner.os == 'macOS'
         run: |
-          curl -fsSL https://raw.githubusercontent.com/wsdjeg/job.nvim/master/lua/job/init.lua -o test/job.lua
-      
+          brew install ripgrep curl
+
+      - name: Install dependencies (windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install ripgrep curl
+
+      - name: Cache test dependencies
+        uses: actions/cache@v4
+        with:
+          path: test/.deps
+          key: test-deps-luaunit-job-${{ runner.os }}
+
       - name: Run tests
         run: make test
 
