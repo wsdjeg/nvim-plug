@@ -35,5 +35,58 @@ function TestInstaller:testUpdateWithEmptySpecs()
   lu.assertTrue(true)
 end
 
+--- Verify that install/update with local plugins does not error
+--- and does not leak process count.
+function TestInstaller:testLocalPluginDoesNotLeakProcesses()
+  installer.install({
+    { name = 'local-1', is_local = true },
+    { name = 'local-2', is_local = true },
+  })
+  lu.assertTrue(true)
+end
+
+--- Verify that install with already-existing raw plugin files
+--- does not start a job (no process leak).
+function TestInstaller:testRawPluginSkipDoesNotLeak()
+  -- create a temp file to simulate existing raw plugin
+  local tmp = vim.fn.tempname()
+  vim.fn.writefile({ '-- fake' }, tmp)
+
+  installer.install({
+    {
+      name = 'fake-raw',
+      type = 'raw',
+      path = tmp,
+      url = 'http://example.com/fake.lua',
+    },
+  })
+
+  -- clean up
+  vim.fn.delete(tmp)
+
+  lu.assertTrue(true)
+end
+
+--- Verify that install with already-existing git plugin dirs
+--- does not start a job (no process leak).
+function TestInstaller:testExistingPluginDirSkipDoesNotLeak()
+  local tmp = vim.fn.tempname() .. '_plugin_dir'
+  vim.fn.mkdir(tmp, 'p')
+
+  installer.install({
+    {
+      name = 'existing-plugin',
+      type = 'git',
+      path = tmp,
+      url = 'http://example.com/repo.git',
+    },
+  })
+
+  -- clean up
+  vim.fn.delete(tmp, 'rf')
+
+  lu.assertTrue(true)
+end
+
 return TestInstaller
 

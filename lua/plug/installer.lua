@@ -174,7 +174,11 @@ function H.download_raw(spec, force)
       https_proxy = config.https_proxy,
     },
   })
-  processes = processes + 1
+  if jobid > 0 then
+    processes = processes + 1
+  else
+    on_update(spec.name, { curl_done = false })
+  end
 end
 
 --- @param spec PluginSpec
@@ -236,7 +240,11 @@ function H.install_plugin(spec)
     },
   })
   log.info('jobid is ' .. jobid)
-  processes = processes + 1
+  if jobid > 0 then
+    processes = processes + 1
+  else
+    on_update(spec.name, { clone_done = false })
+  end
 end
 
 --- @param spec PluginSpec
