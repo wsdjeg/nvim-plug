@@ -74,7 +74,7 @@ end
 --- @return string module
 local function get_default_module(name)
   local module =
-    name:gsub('[%.%-]lua$', ''):gsub('^n?vim-', ''):gsub('[%.%-]n?vim', '')
+    name:gsub('[%.%-]lua$', ''):gsub('^n?vim%-', ''):gsub('[%.%-]n?vim', '')
 
   return module
 end
