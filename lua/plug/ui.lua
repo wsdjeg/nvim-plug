@@ -167,7 +167,8 @@ end
 
 function M.close()
   if
-    vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_win_is_valid(winid)
+    not vim.api.nvim_buf_is_valid(bufnr)
+    and not vim.api.nvim_win_is_valid(winid)
   then
     return
   end
