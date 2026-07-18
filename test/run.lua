@@ -82,12 +82,25 @@ local function run_tests()
   local loaded_count = 0
   local failed_count = 0
 
-  -- Load each test file
+  -- Load each test file and register test classes as globals
+  -- LuaUnit discovers tests by scanning _G for names starting with "Test"
+  -- Test files return their test class table (e.g., `return TestExample`),
+  -- so we capture the return value and register it as a global.
   for _, test_file in ipairs(test_files) do
-    local ok, err = pcall(dofile, test_file)
+    local ok, result = pcall(dofile, test_file)
     if ok then
       print(string.format('[OK] Loaded: %s', test_file))
       loaded_count = loaded_count + 1
+      -- Register returned test class as a global for LuaUnit discovery
+      if type(result) == 'table' then
+        -- Derive a global name from the file path
+        -- e.g., "test/example_spec.lua" -> "TestExample"
+        local basename = test_file:match('([^/\\]+)_spec%.lua$')
+        if basename then
+          local classname = 'Test' .. basename:sub(1, 1):upper() .. basename:sub(2)
+          _G[classname] = result
+        end
+      end
     else
       print(string.format('[FAIL] Failed to load: %s', test_file))
       print(string.format('  Error: %s', err))
