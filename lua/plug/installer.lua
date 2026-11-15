@@ -15,8 +15,6 @@ local config = require('plug.config')
 local loader = require('plug.loader')
 local log = require('plug.logger')
 
-local on_update
-
 --- @class PlugUiData
 --- @field command? string clone/pull/build/curl/luarocks
 --- @field clone_process? string
@@ -29,10 +27,35 @@ local on_update
 --- @field luarocks_done? boolean
 --- @field is_local? boolean
 
-if config.ui == 'default' then
-  on_update = require('plug.ui').on_update
-elseif config.ui == 'notify' then
-  on_update = require('plug.ui.notify').on_update
+--- Resolve the UI callback on every update instead of binding it when the
+--- module is loaded. `config.ui` may be a custom function (see README) or may
+--- be changed after `setup()`, so a load-time binding would either be nil
+--- (crashing on the first update) or stale.
+---@param name string
+---@param data PlugUiData
+local function on_update(name, data)
+  local ui = config.ui
+  if type(ui) == 'function' then
+    ui(name, data)
+  elseif ui == 'notify' then
+    require('plug.ui.notify').on_update(name, data)
+  else
+    require('plug.ui').on_update(name, data)
+  end
+end
+
+--- Proxy environment shared by all network jobs.
+--- Built per call so that `setup()` changes are picked up.
+---@return table<string, string>
+local function proxy_env()
+  local env = {} ---@type table<string, string>
+  if config.http_proxy then
+    env.http_proxy = config.http_proxy
+  end
+  if config.https_proxy then
+    env.https_proxy = config.https_proxy
+  end
+  return env
 end
 
 local processes = 0
@@ -104,14 +127,14 @@ function H.luarocks_install(spec)
     command = 'luarocks',
   })
   local jobid = job.start(cmd, {
-    on_stdout = function(_, date)
+    on_stdout = function(_, data)
       log.debug(
-        'luarocks install ' .. spec.name .. ' stdout >' .. vim.inspect(date)
+        'luarocks install ' .. spec.name .. ' stdout >' .. vim.inspect(data)
       )
     end,
-    on_stderr = function(_, date)
+    on_stderr = function(_, data)
       log.debug(
-        'luarocks install ' .. spec.name .. ' stderr >' .. vim.inspect(date)
+        'luarocks install ' .. spec.name .. ' stderr >' .. vim.inspect(data)
       )
     end,
     on_exit = function(_, data, single)
@@ -123,15 +146,7 @@ function H.luarocks_install(spec)
           .. ' single '
           .. single
       )
-      if data == 0 and single == 0 then
-        on_update(spec.name, {
-          luarocks_done = true,
-        })
-      else
-        on_update(spec.name, {
-          luarocks_done = false,
-        })
-      end
+      on_update(spec.name, { luarocks_done = data == 0 and single == 0 })
       luarocks_running = false
       if #luarocks_tasks > 0 then
         H.run_first_luarocks_task()
@@ -169,10 +184,7 @@ function H.download_raw(spec, force)
         H.run_first_task()
       end
     end,
-    env = {
-      http_proxy = config.http_proxy,
-      https_proxy = config.https_proxy,
-    },
+    env = proxy_env(),
   })
   if jobid > 0 then
     processes = processes + 1
@@ -234,10 +246,7 @@ function H.install_plugin(spec)
         H.run_first_task()
       end
     end,
-    env = {
-      http_proxy = config.http_proxy,
-      https_proxy = config.https_proxy,
-    },
+    env = proxy_env(),
   })
   log.info('jobid is ' .. jobid)
   if jobid > 0 then
@@ -290,10 +299,7 @@ function H.update_plugin(spec, force)
       end
     end,
     cwd = spec.path,
-    env = {
-      http_proxy = config.http_proxy,
-      https_proxy = config.https_proxy,
-    },
+    env = proxy_env(),
   })
   if jobid > 0 then
     processes = processes + 1
@@ -334,3 +340,4 @@ function M.update(specs, force)
 end
 
 return M
+
