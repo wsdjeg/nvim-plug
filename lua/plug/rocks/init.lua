@@ -1,42 +1,104 @@
 ---@class Plug.Rocks
 local M = {}
 
-local util = require('plug.util')
+local log = require('plug.logger')
 
 local rocks = {} ---@type table<string, { rtp: string }>
 
-local function get_installed_rocks()
-  if vim.fn.executable('luarocks') == 0 then
-    return {}
-  end
-  --- @type string
-  local installed_output = vim
-    .system({ 'luarocks', 'list', '--porcelain' }, { text = true })
-    :wait().stdout
+--- Whether the installed rock list has already been scanned.
+--- Kept separate from `rocks` so an empty result is not re-scanned: a single
+--- `luarocks list` subprocess should serve every lookup until refresh().
+local scanned = false ---@type boolean
 
-  for _, v in
-    ipairs(vim.tbl_map(
-      function(t) ---@param t string
-        return vim.split(t, '\t')
-      end,
-      vim.tbl_filter(function(t) ---@param t string
-        return t ~= ''
-      end, vim.split(installed_output, '\n'))
-    ))
-  do
-    ---@cast v string[]
-    rocks[v[1]] = {
-      rtp = util.unify_path(v[4]) .. v[1] .. '/' .. v[2],
-    }
+--- Join a deploy directory with a rock name and version.
+---
+--- The deploy directory does not necessarily exist on disk, so it cannot
+--- rely on util.unify_path() adding a trailing separator: a missing one would
+--- concatenate `/tmp/deploy/lua` with `foo` into `/tmp/deploy/lua/foo` — or
+--- worse, `/tmp/deploy/luafoo`.
+---@param dir string
+---@param name string
+---@param version string
+---@return string rtp
+local function join_rtp(dir, name, version)
+  if dir == '' then
+    return ''
   end
+  local base = dir
+  if base:sub(-1) ~= '/' and base:sub(-1) ~= '\\' then
+    base = base .. '/'
+  end
+  return base .. name .. '/' .. version
 end
 
-local enabled ---@type boolean
+--- Parse `luarocks list --porcelain` output.
+---
+--- Each line is tab separated: `name`, `version`, `status`, `deploy dir`.
+--- Blank and short lines are skipped; indexing them blindly put entries with
+--- a nil key into the cache table.
+---@param output string|nil
+---@return table<string, { rtp: string }> parsed
+function M.parse_list(output)
+  local parsed = {} ---@type table<string, { rtp: string }>
+  if type(output) ~= 'string' or output == '' then
+    return parsed
+  end
+
+  for _, line in ipairs(vim.split(output, '\n')) do
+    if line ~= '' then
+      local fields = vim.split(line, '\t')
+      if #fields >= 4 and fields[1] ~= '' and fields[2] ~= '' then
+        parsed[fields[1]] = {
+          rtp = join_rtp(fields[4], fields[1], fields[2]),
+        }
+      end
+    end
+  end
+
+  return parsed
+end
+
+--- Drop the cache so the next lookup rescans installed rocks.
+function M.refresh()
+  rocks = {}
+  scanned = false
+end
+
+--- Scan installed rocks, at most once per cache generation.
+local function scan()
+  if scanned then
+    return
+  end
+  scanned = true
+
+  if vim.fn.executable('luarocks') == 0 then
+    return
+  end
+
+  local ok, output = pcall(function()
+    return vim
+      .system({ 'luarocks', 'list', '--porcelain' }, { text = true })
+      :wait().stdout
+  end)
+  if not ok then
+    log.warn('failed to list luarocks packages: ' .. tostring(output))
+    return
+  end
+
+  rocks = M.parse_list(output)
+end
+
+local enabled = false ---@type boolean
+
 function M.enable()
   if enabled then
     return
   end
-  local ok, _ = pcall(function()
+  if vim.fn.executable('luarocks') == 0 then
+    return
+  end
+
+  local ok, err = pcall(function()
     local luarocks_config = vim.json.decode(
       vim.system({ 'luarocks', 'config', '--json' }):wait().stdout
     )
@@ -57,15 +119,15 @@ function M.enable()
   end)
   if ok then
     enabled = true
+  else
+    log.warn('failed to enable luarocks support: ' .. tostring(err))
   end
 end
 
 ---@param rock string
----@return { rtp: string } retrieved
+---@return { rtp: string }|nil retrieved
 function M.get(rock)
-  if not rocks[rock] then
-    get_installed_rocks()
-  end
+  scan()
   return rocks[rock]
 end
 
