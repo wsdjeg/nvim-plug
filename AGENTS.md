@@ -193,6 +193,9 @@ nvim-plug/
 │   ├── minimal_init.lua  # Headless test minimal config
 │   ├── run.lua           # luaunit test runner with PATTERN support
 │   ├── install_deps.lua  # Cross-platform dependency installer
+│   ├── terminal.lua      # terminal.nvim stub for picker tests
+│   ├── picker/
+│   │   └── previewer/    # picker.nvim previewer stubs (file, cmd)
 │   └── *_spec.lua        # Test files
 ├── Makefile
 ├── README.md
@@ -209,8 +212,9 @@ nvim-plug/
 ### Key Concepts
 
 - **PluginSpec** - table describing a plugin (repo, type, lazy-load triggers, config, etc.)
-- **Plugin types** - `git` (default), `rocks` (LuaRocks), `raw` (direct download), `none`
-- **Lazy-loading** - via `events`, `cmds`, `on_ft`, `on_func`, `on_map`, `keys`
+  - `[1]` repo is optional when `url` is given; the name comes from the last URL segment
+- **Plugin types** - `git` (default), `rocks` (LuaRocks), `raw` (direct download via curl)
+- **Lazy-loading** - via `events`, `cmds`, `on_ft`, `on_func`, `on_map` (each accepts `string|string[]`); `keys` is eager
 - **Priority** - higher priority loads first (requires `enable_priority = true` and `plug.load()`)
-- **import** - auto-load PluginSpecs from `plugins/` directory in runtimepath
+- **import** - auto-load PluginSpecs from `plugins/` directory in runtimepath; a broken spec file is logged and skipped
 
