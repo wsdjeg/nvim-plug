@@ -5,64 +5,41 @@
 -- License: GPLv3
 --=============================================================================
 
----@param a string
----@return string[]
+--- @param a string
+--- @return string[]
 local function complete(a)
-  local plug_name = {} ---@type string[]
-  for k, _ in pairs(require('plug').get()) do
-    if a and vim.startswith(k, a) then
-      table.insert(plug_name, k)
-    end
-  end
-  return plug_name
+  return require('plug.command').complete_names(a)
 end
 
-vim.api.nvim_create_user_command('PlugInstall', function(opt)
-  local plugs = {} ---@type PluginSpec[]
-  local all_plugins = require('plug').get()
-  if vim.tbl_isempty(opt.fargs) then
-    for _, v in pairs(all_plugins) do
-      table.insert(plugs, v)
+--- Deprecated `:PlugInstall` / `:PlugUpdate`.
+---
+--- Both used to re-implement plugin collection themselves. They are now
+--- thin wrappers around the `:Plug` subcommands: the subcommand name is
+--- prefixed onto the user supplied arguments so spec collection and UI
+--- handling stay in one place (plug.command).
+--- @param sub 'install'|'update'
+--- @return fun(opt: vim.api.keyset.create_user_command.command_args)
+local function deprecated(sub)
+  return function(opt)
+    local command = require('plug.command')
+    local fargs = { sub }
+    vim.list_extend(fargs, opt.fargs)
+    local specs, force = command.collect(fargs)
+    if sub == 'install' then
+      require('plug.installer').install(specs)
+    else
+      require('plug.installer').update(specs, force)
     end
-  else
-    for _, v in ipairs(opt.fargs) do
-      if all_plugins[v] then
-        table.insert(plugs, all_plugins[v])
-      end
-    end
+    command.open_ui()
   end
-  require('plug.installer').install(plugs)
-  local c = require('plug.config')
-  if c.ui == 'default' then
-    require('plug.ui').open()
-  end
-end, {
+end
+
+vim.api.nvim_create_user_command('PlugInstall', deprecated('install'), {
   nargs = '*',
   complete = complete,
 })
 
-vim.api.nvim_create_user_command('PlugUpdate', function(opt)
-  local plugs = {} ---@type PluginSpec[]
-  local force = false
-  local all_plugins = require('plug').get()
-  if vim.tbl_isempty(opt.fargs) then
-    for _, v in pairs(all_plugins) do
-      table.insert(plugs, v)
-    end
-  else
-    force = true
-    for _, v in ipairs(opt.fargs) do
-      if all_plugins[v] then
-        table.insert(plugs, all_plugins[v])
-      end
-    end
-  end
-  require('plug.installer').update(plugs, force)
-  local c = require('plug.config')
-  if c.ui == 'default' then
-    require('plug.ui').open()
-  end
-end, {
+vim.api.nvim_create_user_command('PlugUpdate', deprecated('update'), {
   nargs = '*',
   complete = complete,
 })
@@ -73,3 +50,4 @@ end, {
   nargs = '*',
   complete = require('plug.command').complete,
 })
+
