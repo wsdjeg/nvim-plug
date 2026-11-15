@@ -6,30 +6,19 @@
 --=============================================================================
 
 ---@class PlugOpts
--- set the bundle dir
----@field bundle_dir? string
--- set the path where raw plugin is download to
----@field raw_plugin_dir? string
--- max number of processes used for nvim-plug job
----@field max_processes? integer
----@field base_url? string
--- default ui is `default`,
--- to use `notify` for floating window notify
--- you need to install `wsdjeg/notify.nvim`
----@field ui? 'default'|'notify'
--- default is nil
----@field http_proxy? nil|string
--- default is nil
----@field https_proxy? nil|string
--- default history depth for `git clone`
----@field clone_depth? integer|string
--- plugin priority, readme [plugin priority] for more info
----@field enable_priority? boolean
--- enables the user to focus to the UI window when opened
----@field focus_window? boolean
----@field import? string
----@field enable_luarocks? boolean
----@field dev_path? nil|string
+---@field bundle_dir? string                          # directory plugins are cloned into
+---@field raw_plugin_dir? string                      # directory raw plugins are downloaded into
+---@field max_processes? integer                      # max concurrent jobs
+---@field base_url? string                            # base url used to build plugin urls
+---@field ui? 'default'|'notify'|fun(name: string, data: table)
+---@field http_proxy? string|nil                      # default: nil
+---@field https_proxy? string|nil                     # default: nil
+---@field clone_depth? integer|string                 # default `git clone` depth, 0 disables `--depth`
+---@field enable_priority? boolean                    # load plugins ordered by priority
+---@field focus_window? boolean                       # focus the UI window when it opens
+---@field import? string                              # directory name for auto-loading plugin specs
+---@field enable_luarocks? boolean                    # enable LuaRocks integration
+---@field dev_path? string|nil                        # development directory for local plugins
 
 ---@class Plug.Config: PlugOpts
 local M = {}
@@ -40,32 +29,48 @@ M.dev_path = nil
 M.max_processes = 5
 M.base_url = 'https://github.com'
 M.ui = 'default'
-M.clone_depth = '1'
+M.clone_depth = 1
 M.import = 'plugins'
 M.enable_priority = false
 M.enable_luarocks = false
 M.focus_window = false
+M.http_proxy = nil
+M.https_proxy = nil
 
+--- Merge user options into the current configuration.
+---
+--- Only keys present in `opt` are touched, and `false` / `0` / `''` are
+--- treated as real values. Using `opt.k or M.k` here would silently drop
+--- those, e.g. `enable_priority = false` could never turn the flag off and
+--- repeated `setup()` calls would wipe the proxies.
 ---@param opt? PlugOpts
 function M.setup(opt)
   opt = opt or {}
 
-  M.bundle_dir = opt.bundle_dir or M.bundle_dir
-  M.max_processes = opt.max_processes or M.max_processes
-  M.base_url = opt.base_url or M.base_url
-  M.ui = opt.ui or M.ui
-  M.http_proxy = opt.http_proxy
-  M.https_proxy = opt.https_proxy
-  M.clone_depth = opt.clone_depth or M.clone_depth
-  M.raw_plugin_dir = opt.raw_plugin_dir or M.raw_plugin_dir
-  M.enable_priority = opt.enable_priority or M.enable_priority
-  M.focus_window = opt.focus_window or M.focus_window
-  M.import = opt.import or M.import
-  M.dev_path = opt.dev_path or M.dev_path
-  M.enable_luarocks = opt.enable_luarocks or M.enable_luarocks
+  local function merge(key, value)
+    if value ~= nil then
+      M[key] = value
+    end
+  end
+
+  merge('bundle_dir', opt.bundle_dir)
+  merge('max_processes', opt.max_processes)
+  merge('base_url', opt.base_url)
+  merge('ui', opt.ui)
+  merge('http_proxy', opt.http_proxy)
+  merge('https_proxy', opt.https_proxy)
+  merge('clone_depth', opt.clone_depth)
+  merge('raw_plugin_dir', opt.raw_plugin_dir)
+  merge('enable_priority', opt.enable_priority)
+  merge('focus_window', opt.focus_window)
+  merge('import', opt.import)
+  merge('dev_path', opt.dev_path)
+  merge('enable_luarocks', opt.enable_luarocks)
+
   if M.enable_luarocks then
     require('plug.rocks').enable()
   end
 end
 
 return M
+
