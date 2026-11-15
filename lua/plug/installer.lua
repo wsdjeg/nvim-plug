@@ -44,6 +44,16 @@ local function on_update(name, data)
   end
 end
 
+--- Clear per-run UI state before a new install/update run.
+---
+--- Only the default UI keeps state between runs; a custom `ui` function owns
+--- its own bookkeeping, and the notify UI is stateless.
+local function reset_ui()
+  if config.ui == 'default' then
+    require('plug.ui').reset()
+  end
+end
+
 --- Proxy environment shared by all network jobs.
 --- Built per call so that `setup()` changes are picked up.
 ---@return table<string, string>
@@ -310,6 +320,7 @@ end
 
 ---@param specs PluginSpec[]
 function M.install(specs)
+  reset_ui()
   for _, v in ipairs(specs) do
     if v.is_local then
       on_update(v.name, { is_local = true })
@@ -326,6 +337,7 @@ end
 --- @param specs PluginSpec[]
 --- @param force? boolean
 function M.update(specs, force)
+  reset_ui()
   for _, v in ipairs(specs) do
     if v.is_local then
       on_update(v.name, { is_local = true })

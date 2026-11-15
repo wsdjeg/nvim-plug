@@ -11,9 +11,22 @@ local M = {}
 local bufnr = -1 ---@type integer
 local winid = -1 ---@type integer
 local done = 0 ---@type integer
-local total = -1 ---@type integer
+local total = 0 ---@type integer
 local weight = 100 ---@type integer
 local plugin_status = {} ---@type table<string, PlugUiData>
+
+--- Extra columns reserved by the progress bar layout.
+local BAR_PADDING = 10
+
+--- Clear the collected status data.
+---
+--- Without this the table survives between runs, so a second
+--- `:Plug install` would show plugins from the previous run.
+function M.reset()
+  plugin_status = {}
+  done = 0
+  total = 0
+end
 
 ---@param data table<string, PlugUiData>
 ---@return integer done
@@ -31,8 +44,22 @@ end
 local function base()
   total = #vim.tbl_keys(plugin_status)
   done = count_done(plugin_status)
-  weight = vim.api.nvim_win_get_width(winid) - 10
-  local reps = math.floor(done / total * weight)
+
+  local width = 0
+  if vim.api.nvim_win_is_valid(winid) then
+    width = vim.api.nvim_win_get_width(winid)
+  end
+  -- A window narrower than the padding made this negative, and
+  -- string.rep() raises on a negative count.
+  weight = math.max(0, width - BAR_PADDING)
+
+  local reps = 0
+  if total > 0 and weight > 0 then
+    -- total is 0 before the first update; dividing by it produced nan.
+    reps = math.floor(done / total * weight)
+    reps = math.max(0, math.min(weight, reps))
+  end
+
   return {
     string.format('Plugins:(%s/%s)', done, total),
     '',
@@ -85,9 +112,9 @@ local function build_context()
       end
     elseif plug.command == 'curl' then
       if plug.curl_done then
-        msg = string.format('√ %s dowload', k)
+        msg = string.format('√ %s downloaded', k)
       elseif plug.curl_done == false then
-        msg = string.format('× %s failed to dowload', k)
+        msg = string.format('× %s failed to download', k)
       else
         msg = string.format('- %s downloading', k)
       end
@@ -140,6 +167,10 @@ function M.open()
     end
   end
 
+  if not vim.api.nvim_win_is_valid(winid) then
+    return
+  end
+
   vim.fn.matchadd('PlugTitle', '^Plugins.*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugProcess', '^\\[\\zs=*', 2, -1, { window = winid })
   vim.fn.matchadd('PlugDone', '^√.*', 2, -1, { window = winid })
@@ -179,3 +210,4 @@ function M.close()
 end
 
 return M
+

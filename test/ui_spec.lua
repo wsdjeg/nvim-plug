@@ -6,33 +6,69 @@ local ui = require('plug.ui')
 
 local TestUi = {}
 
+--- Locate the UI buffer by its title line.
+---
+--- Note: this must not use a Lua pattern with real parentheses - `(` starts
+--- a capture in Lua patterns and would never match the literal title.
+---@return integer bufnr
+local function find_ui_buffer()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, 1, false)
+      if lines[1] and vim.startswith(lines[1], 'Plugins:(') then
+        return buf
+      end
+    end
+  end
+  return -1
+end
+
+---@return string[] lines
+local function ui_lines()
+  local buf = find_ui_buffer()
+  if buf == -1 then
+    return {}
+  end
+  return vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+end
+
+---@param lines string[]
+---@param pattern string plain substring
+---@return boolean found
+local function any_line_contains(lines, pattern)
+  for _, line in ipairs(lines) do
+    if line:find(pattern, 1, true) then
+      return true
+    end
+  end
+  return false
+end
+
 function TestUi:setUp()
-  -- ensure clean state before each test
   ui.close()
+  ui.reset()
 end
 
 function TestUi:tearDown()
   ui.close()
+  ui.reset()
 end
 
 function TestUi:testCloseWhenNothingOpen()
   -- close() should be a no-op when nothing is open
-  -- it should not error
   ui.close()
   lu.assertTrue(true)
 end
 
 function TestUi:testCloseActuallyClosesWindow()
-  -- open the UI, then close it, verify no error
   ui.open()
   vim.cmd('redraw')
 
-  -- close it
   ui.close()
 
   -- after close, calling close again should be a no-op (no error)
   ui.close()
-  lu.assertTrue(true)
+  lu.assertEquals(find_ui_buffer(), -1)
 end
 
 function TestUi:testOnUpdateDoesNotErrorWithoutWindow()
@@ -44,24 +80,96 @@ end
 --- count_done should count failed plugins as done so the progress
 --- bar can reach 100% even when some plugins fail.
 function TestUi:testFailedPluginCountedAsDone()
-  -- register a plugin that failed to clone
   ui.on_update('fail-plugin', { command = 'clone', clone_done = false })
-  -- register a plugin that succeeded
   ui.on_update('ok-plugin', { command = 'clone', clone_done = true })
 
-  -- open the UI - this calls build_context() -> count_done()
-  -- if count_done didn't count failures, the progress bar would
-  -- show 1/2 instead of 2/2, and the code wouldn't error here
   ui.open()
-  vim.cmd('redraw')
-
-  -- read the first line of the buffer: "Plugins:(done/total)"
-  -- Note: we can't easily access the internal bufnr, but if the
-  -- code had a division issue (total=0), it would error.
-  -- The key assertion is that open() succeeds without error.
-
+  local lines = ui_lines()
   ui.close()
-  lu.assertTrue(true)
+
+  lu.assertEquals(lines[1], 'Plugins:(2/2)', table.concat(lines, '\n'))
+end
+
+--- An empty status table must not divide by zero. Doing so produced a
+--- nan progress bar width and `string.rep` then errored out.
+function TestUi:testOpenWithNoPluginsDoesNotError()
+  ui.open()
+  local lines = ui_lines()
+  ui.close()
+
+  lu.assertEquals(lines[1], 'Plugins:(0/0)', table.concat(lines, '\n'))
+end
+
+--- `weight` is derived from the window width; a window narrower than the
+--- constant offset made it negative, and `string.rep(' ', negative)` errors.
+function TestUi:testProgressBarToleratesNarrowWindow()
+  ui.on_update('narrow', { command = 'clone', clone_done = true })
+  ui.open()
+
+  local buf = find_ui_buffer()
+  local win = buf ~= -1 and vim.fn.bufwinid(buf) or -1
+  if win ~= -1 then
+    pcall(vim.api.nvim_win_set_width, win, 1)
+  end
+
+  local ok, err = pcall(ui.on_update, 'narrow', { clone_process = '50%' })
+  ui.close()
+
+  lu.assertTrue(ok, tostring(err))
+end
+
+--- reset() must clear data from a previous run, otherwise a second
+--- `:Plug install` shows stale plugins in the window.
+function TestUi:testResetClearsPreviousRun()
+  ui.on_update('old-run', { command = 'clone', clone_done = true })
+  ui.reset()
+
+  ui.open()
+  local lines = ui_lines()
+  ui.close()
+
+  lu.assertEquals(lines[1], 'Plugins:(0/0)', table.concat(lines, '\n'))
+  lu.assertFalse(
+    any_line_contains(lines, 'old-run'),
+    table.concat(lines, '\n')
+  )
+end
+
+--- Download success message must be spelled correctly.
+function TestUi:testDownloadSuccessMessage()
+  ui.on_update('curl-plugin', { command = 'curl', curl_done = true })
+
+  ui.open()
+  local lines = ui_lines()
+  ui.close()
+
+  lu.assertFalse(
+    any_line_contains(lines, 'dowload'),
+    table.concat(lines, '\n')
+  )
+  lu.assertFalse(
+    any_line_contains(lines, 'failed to dowload'),
+    table.concat(lines, '\n')
+  )
+  lu.assertTrue(
+    any_line_contains(lines, 'curl-plugin'),
+    table.concat(lines, '\n')
+  )
+end
+
+--- Local plugins are reported as skipped and counted as done.
+function TestUi:testLocalPluginIsCountedDone()
+  ui.on_update('local-plugin', { is_local = true })
+
+  ui.open()
+  local lines = ui_lines()
+  ui.close()
+
+  lu.assertEquals(lines[1], 'Plugins:(1/1)', table.concat(lines, '\n'))
+  lu.assertTrue(
+    any_line_contains(lines, 'skip local plugin'),
+    table.concat(lines, '\n')
+  )
 end
 
 return TestUi
