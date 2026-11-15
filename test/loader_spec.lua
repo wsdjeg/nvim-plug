@@ -231,6 +231,36 @@ end
 -- depends handling (tested via plug.add)
 -----------------------------------------------------------
 
+-----------------------------------------------------------
+-- spec without a repo name (url-only raw plugins)
+-----------------------------------------------------------
+
+--- README documents raw plugins specified by `url` alone, without a
+--- `[1]` repo string. parser() must not blow up on those.
+function TestLoader:testRawTypeWithUrlOnly()
+  local spec = parse({
+    type = 'raw',
+    url = 'https://example.com/gist/markdown.vim',
+    script_type = 'after/syntax',
+  })
+  lu.assertTrue(spec.enabled)
+  lu.assertEquals(spec.name, 'markdown.vim')
+  lu.assertEquals(
+    spec.path,
+    config.raw_plugin_dir .. '/after/syntax/markdown.vim'
+  )
+  lu.assertFalse(spec.is_local or false)
+end
+
+--- Same as above but for a git plugin that only provides `url`.
+function TestLoader:testGitTypeWithUrlOnly()
+  local spec = parse({
+    url = 'https://example.com/org/foo.nvim',
+  })
+  lu.assertEquals(spec.name, 'foo.nvim')
+  lu.assertEquals(spec.path, config.bundle_dir .. '/foo.nvim')
+end
+
 function TestLoader:testParserDoesNotProcessDepends()
   -- parser itself does not recurse into depends; that's plug.add's job
   local spec = parse({

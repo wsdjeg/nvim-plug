@@ -16,7 +16,7 @@ local util = require('plug.util')
 local add_raw_rtp = false ---@type boolean
 
 --- @class PluginSpec
---- @field [1] string repo
+--- @field [1]? string repo repo short name, derived from `url` when omitted
 --- @field rtp? string default rtp path
 --- @field depends? PluginSpec[] plugin dependencies
 --- @field events? string[] lazy events to load this plugin
@@ -31,13 +31,13 @@ local add_raw_rtp = false ---@type boolean
 --- @field is_local? boolean true for local plugin
 --- @field when? boolean|string|function
 --- @field frozen? boolean if set to true, :PlugUpdate will not update this plugin without bang
---- @field type? string "git", "raw" or "none"
---- @field script_type? string "git", "raw" or "none"
+--- @field type? string "git", "raw", "rocks" or "none"
+--- @field script_type? string "color", "plugin", "after/syntax", etc.
 --- @field opts? table plugin setup opts
 --- @field keys? table list of key bindings
 --- @field config? function function called after update rtp
---- @field config_before? function function called after update rtp
---- @field config_after? function function called after update rtp
+--- @field config_before? function function called after running plug.add()
+--- @field config_after? function function called after loading plugin/ files
 --- @field hook_install_done? function
 --- @field autoload? boolean
 --- @field fetch? boolean If set to true, nvim-plug doesn't add the path to user runtimepath, and doesn't load the bundle
@@ -51,15 +51,25 @@ local add_raw_rtp = false ---@type boolean
 --- @field on_map? string[]|string key bindings lazy loading
 --- @field on_func? string[]|string vim function lazy loading
 
+--- Check whether the spec points to an existing local directory.
+--- Specs without a `[1]` repo (e.g. url-only raw plugins) are never local,
+--- and must not be passed to isdirectory() as a nil argument.
 --- @param spec PluginSpec
 --- @return boolean is_local
 local function is_local_plugin(spec)
-  if spec.is_local or vim.fn.isdirectory(spec[1]) == 1 then
+  if spec.is_local then
+    return true
+  end
+  if not spec[1] then
+    return false
+  end
+  if vim.fn.isdirectory(spec[1]) == 1 then
     spec.is_local = true
     return true
   end
   return false
 end
+
 --- @param spec PluginSpec
 --- @return string plugin_name
 local function check_name(spec)
@@ -109,7 +119,7 @@ function M.parser(spec)
       )
     )
   end
-  if spec.name:len() == 0 then
+  if spec.name == '' then
     spec.enabled = false
     return spec
   end
@@ -119,6 +129,8 @@ function M.parser(spec)
       spec.dev_path = dev_path
     end
   end
+  -- repo short name; may be missing for url-only specs
+  local repo = spec[1] or spec.name
   if is_local_plugin(spec) then
     spec.rtp = spec[1]
     spec.path = spec[1]
@@ -140,19 +152,19 @@ function M.parser(spec)
       vim.o.rtp = table.concat(rtp_list, ',')
       add_raw_rtp = true
     end
-  elseif spec.type == 'rocks' then -- NOTE: (DrKJeff16) ????
+  elseif spec.type == 'rocks' then -- rtp is set by plug.rocks
   elseif not spec.script_type or spec.script_type == 'none' then
-    spec.rtp = config.bundle_dir .. '/' .. spec[1]
-    spec.path = config.bundle_dir .. '/' .. spec[1]
-    spec.url = config.base_url .. '/' .. spec[1]
+    spec.rtp = config.bundle_dir .. '/' .. repo
+    spec.path = config.bundle_dir .. '/' .. repo
+    spec.url = spec.url or (config.base_url .. '/' .. repo)
   elseif spec.script_type == 'color' then
-    spec.rtp = config.bundle_dir .. '/' .. spec[1]
-    spec.path = config.bundle_dir .. '/' .. spec[1] .. '/color'
-    spec.url = config.base_url .. '/' .. spec[1]
+    spec.rtp = config.bundle_dir .. '/' .. repo
+    spec.path = config.bundle_dir .. '/' .. repo .. '/color'
+    spec.url = spec.url or (config.base_url .. '/' .. repo)
   elseif spec.script_type == 'plugin' then
-    spec.rtp = config.bundle_dir .. '/' .. spec[1]
-    spec.path = config.bundle_dir .. '/' .. spec[1] .. '/plugin'
-    spec.url = config.base_url .. '/' .. spec[1]
+    spec.rtp = config.bundle_dir .. '/' .. repo
+    spec.path = config.bundle_dir .. '/' .. repo .. '/plugin'
+    spec.url = spec.url or (config.base_url .. '/' .. repo)
   end
   if spec.autoload == nil and spec.type ~= 'raw' and not spec.fetch then
     spec.autoload = true
@@ -224,7 +236,7 @@ function M.load(spec)
     if spec.keys then
       for _, key in ipairs(spec.keys) do
         pcall(function()
-          vim.keymap.set(unpack(key))
+          vim.keymap.set(table.unpack(key))
         end)
       end
     end
@@ -249,3 +261,4 @@ function M.load(spec)
 end
 
 return M
+
