@@ -39,16 +39,25 @@ local function get_test_files()
   else
     -- Shorthand: search for matching files
     -- e.g., "util" -> test/**/*util*_spec.lua
-    files = vim.split(vim.fn.globpath('test', string.format('**/*%s*_spec.lua', pattern)), '\n')
+    files = vim.split(
+      vim.fn.globpath('test', string.format('**/*%s*_spec.lua', pattern)),
+      '\n'
+    )
 
     -- Also try exact match: e.g., "util_spec.lua"
     if #files == 0 then
-      files = vim.split(vim.fn.globpath('test', string.format('%s*_spec.lua', pattern)), '\n')
+      files = vim.split(
+        vim.fn.globpath('test', string.format('%s*_spec.lua', pattern)),
+        '\n'
+      )
     end
 
     -- Try with _spec.lua suffix
     if #files == 0 then
-      files = vim.split(vim.fn.globpath('test', string.format('**/%s_spec.lua', pattern)), '\n')
+      files = vim.split(
+        vim.fn.globpath('test', string.format('**/%s_spec.lua', pattern)),
+        '\n'
+      )
     end
 
     -- Remove empty strings
@@ -69,9 +78,6 @@ local function run_tests()
   local test_files = get_test_files()
 
   print('=== nvim-plug Test Suite ===')
-  if _G.TEST_PATTERN and _G.TEST_PATTERN ~= '' then
-    print(string.format('Filter: %s', _G.TEST_PATTERN))
-  end
   print(string.format('Found %d test file(s)\n', #test_files))
 
   if #test_files == 0 then
@@ -97,13 +103,16 @@ local function run_tests()
         -- e.g., "test/example_spec.lua" -> "TestExample"
         local basename = test_file:match('([^/\\]+)_spec%.lua$')
         if basename then
-          local classname = 'Test' .. basename:sub(1, 1):upper() .. basename:sub(2)
+          local classname = 'Test'
+            .. basename:sub(1, 1):upper()
+            .. basename:sub(2)
           _G[classname] = result
         end
       end
     else
       print(string.format('[FAIL] Failed to load: %s', test_file))
-      print(string.format('  Error: %s', err))
+      -- `result` is the error object when the pcall fails
+      print(string.format('  Error: %s', vim.inspect(result)))
       failed_count = failed_count + 1
     end
   end
@@ -121,7 +130,8 @@ local function run_tests()
     return 1
   end
 
-  -- Run test suite (LuaUnit automatically finds all Test* classes in global namespace)
+  -- Run test suite (LuaUnit automatically finds all Test* classes in global
+  -- namespace)
   print('\nRunning tests...\n')
   local runner = lu.LuaUnit:new()
   runner:setOutputType('tap')
